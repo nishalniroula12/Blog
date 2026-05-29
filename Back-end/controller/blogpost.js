@@ -29,9 +29,16 @@ export const blogcreate = async (req, res) => {
 // getdata
 export const bloggetdata = async (req, res) => {
   try {
+    const page =parseInt(req.query.page ) || 1
+    const limit =parseInt(req.query.limit) || 6
+    const skip =(page -1) * limit
+
+    const TotalBlog =await Blog.countDocuments()
+    console.log(TotalBlog)
+
     
  
-        const blogs = await Blog.find().populate("category");
+        const blogs = await Blog.find().populate("category").sort({createdAt:-1}).skip(skip).limit(limit);
     
         const blogwithlikecount = await Promise.all(
           blogs.map(async (blog) => {
@@ -51,6 +58,8 @@ export const bloggetdata = async (req, res) => {
           success: true,
           message: "data is get",
           blog: blogwithlikecount,
+          currentpage:page,
+          totalpages :Math.ceil(TotalBlog / limit),
         });
       } catch (error) {
         console.log(error);
@@ -168,10 +177,16 @@ export const like =async(req,res)=>
 export const getlikeblog =async(req,res)=>
 {
   try {
+    const page =parseInt(req.query.page) || 1
+    const limit =parseInt(req.query.limit) || 6
+    const skip =(page -1) *limit
+    const totallike =await Likemodel.countDocuments()
+    console.log(totallike)
+
     
     const userid=req.user.id
     console.log("REQ USER:", req.user);
-    const likeblogs =await Likemodel.find({User:userid}).populate({
+    const likeblogs =await Likemodel.find({User:userid}).sort({createdAt :-1}).skip(skip).limit(limit).populate({
       path:"Blog",
       populate:[
         {path:"category" ,select:"name"},
@@ -180,7 +195,10 @@ export const getlikeblog =async(req,res)=>
     if(!likeblogs.length){
 
       return res.status(200).json({
-        likeblogs:[]
+        likeblogs:[],
+        currentpage:page,
+        totalpages:Math.ceil(totallike /limit)
+
       })
 
       

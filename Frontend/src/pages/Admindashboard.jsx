@@ -4,6 +4,8 @@ import { useNavigate, Outlet } from "react-router-dom";
 import { FaUserCircle, FaSearch, FaBell, FaCog } from "react-icons/fa";
 
 import Sidebar from "./Sidebar";
+import { useDispatch } from "react-redux";
+import { logoutUser } from "../Redux/Slice";
 
 function Admindashboard() {
   const navigate = useNavigate();
@@ -13,6 +15,7 @@ function Admindashboard() {
   const [category, setCategory] = useState(0);
   const [like, setlike] = useState(0);
   const nav = useNavigate();
+  const dispatch = useDispatch()
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -42,6 +45,7 @@ function Admindashboard() {
       localStorage.removeItem("tokens");
       localStorage.removeItem("loggedin");
       localStorage.removeItem("user");
+     
 
       navigate("/login");
     } catch (error) {
@@ -428,22 +432,22 @@ function Admindashboard() {
           </div>
         </div>
         <div className="flex flex-wrap gap-4 mt-6">
-  <button
-    onClick={() => nav("/adminblog")}
-    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-all duration-300 hover:scale-105"
-  >
-    Add Blog
-  </button>
+          <button
+            onClick={() => nav("/adminblog")}
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-all duration-300 hover:scale-105"
+          >
+            Add Blog
+          </button>
 
-  <button
-    onClick={() => nav("/allcategory")}
-    className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl shadow-md transition-all duration-300 hover:scale-105"
-  >
-    Add Category
-  </button>
-</div>
+          <button
+            onClick={() => nav("/allcategory")}
+            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl shadow-md transition-all duration-300 hover:scale-105"
+          >
+            Add Category
+          </button>
+        </div>
         {/* PAGE CONTENT */}
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-8login">
           <Outlet />
         </main>
       </div>

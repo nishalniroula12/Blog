@@ -6,6 +6,8 @@ const LikeBlog = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [like, setLike] = useState(0)
+  const [page,setpage] =useState(1)
+  const [totalpages ,settotalpages] =useState(0)
 
   const blogfetch = async () => {
     try {
@@ -13,10 +15,16 @@ const LikeBlog = () => {
         "http://localhost:4000/api/getlike",
         {
           withCredentials: true,
+          params:{
+            page,
+            limit:3
+
+          }
         }
       );
 
       console.log(res.data);
+      settotalpages(res.data.totalpages)
 
       // ✅ ONLY THIS
       setData(res.data.likeblogs);
@@ -30,7 +38,7 @@ const LikeBlog = () => {
 
   useEffect(() => {
     blogfetch();
-  }, []);
+  }, [page]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -74,6 +82,40 @@ const LikeBlog = () => {
           </div>
         )}
       </div>
+      <div className="flex items-center justify-center gap-4 mt-8">
+        <button
+          disabled={page === 1}
+          onClick={() => setpage(page - 1)}
+          className={`px-5 py-2 rounded-xl font-medium transition
+      ${
+        page === 1
+          ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+          : "bg-indigo-600 text-white hover:bg-indigo-700"
+      }`}
+        >
+          ← Prev
+        </button>
+
+        <div className="bg-white shadow px-5 py-2 rounded-xl border">
+          <span className="font-semibold text-slate-700">
+            Page {page} of {totalpages}
+          </span>
+        </div>
+
+        <button
+          disabled={page === totalpages}
+          onClick={() => setpage(page + 1)}
+          className={`px-5 py-2 rounded-xl font-medium transition
+      ${
+        page === totalpages
+          ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+          : "bg-indigo-600 text-white hover:bg-indigo-700"
+      }`}
+        >
+          Next →
+        </button>
+      </div>
+     
     </div>
   );
 };

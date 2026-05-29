@@ -7,6 +7,14 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 const Allblog = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setpage] = useState(1);
+  const [totalpages, settotalpages] = useState(0);
+
+  // STORE ALL BLOGS FOR SEARCH
+  const [allblog, setallblog] = useState([]);
+
+  // SEARCH VALUE
+  const [searchVal, setsearchVal] = useState("");
 
   const navigate = useNavigate();
 
@@ -19,10 +27,20 @@ const Allblog = () => {
         "http://localhost:4000/api/getblog",
         {
           withCredentials: true,
+          params: {
+            page,
+            limit: 2,
+          },
         }
       );
 
+      settotalpages(res.data.totalpages);
+
+      // CURRENT PAGE DATA
       setData(res.data.blog || []);
+
+      // STORE ALL BLOGS
+      setallblog(res.data.blog || []);
     } catch (error) {
       console.log(error);
     } finally {
@@ -32,7 +50,7 @@ const Allblog = () => {
 
   useEffect(() => {
     blogfetch();
-  }, []);
+  }, [page]);
 
   // ================= DELETE BLOG =================
   const deleteblog = async (id) => {
@@ -62,6 +80,24 @@ const Allblog = () => {
     }
   };
 
+  // ================= SEARCH BLOG =================
+  const handlesearch = () => {
+    // IF SEARCH EMPTY SHOW ALL BLOGS
+    if (searchVal.trim() === "") {
+      setData(allblog);
+      return;
+    }
+
+    // FILTER BLOGS
+    const filteredBlogs = allblog.filter((item) =>
+      item.title
+        .toLowerCase()
+        .includes(searchVal.toLowerCase())
+    );
+
+    setData(filteredBlogs);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex">
 
@@ -84,6 +120,29 @@ const Allblog = () => {
             </p>
           </div>
 
+          {/* SEARCH */}
+          <div className="flex gap-3 items-center">
+
+            <input
+              type="text"
+              value={searchVal}
+              onChange={(e) =>
+                setsearchVal(e.target.value)
+              }
+              placeholder="Search Blog Title"
+              className="w-full max-w-md px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            />
+
+            <button
+              onClick={handlesearch}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-medium"
+            >
+              Search
+            </button>
+
+          </div>
+
+          {/* ADD BLOG BUTTON */}
           <button
             onClick={() => navigate("/adminblog")}
             className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl shadow-md font-medium transition"
@@ -228,6 +287,43 @@ const Allblog = () => {
             </div>
 
           )}
+
+          {/* PAGINATION */}
+          <div className="flex items-center justify-center gap-4 mt-8 pb-6">
+
+            <button
+              disabled={page === 1}
+              onClick={() => setpage(page - 1)}
+              className={`px-5 py-2 rounded-xl font-medium transition
+              ${
+                page === 1
+                  ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                  : "bg-indigo-600 text-white hover:bg-indigo-700"
+              }`}
+            >
+              ← Prev
+            </button>
+
+            <div className="bg-white shadow px-5 py-2 rounded-xl border">
+              <span className="font-semibold text-slate-700">
+                Page {page} of {totalpages}
+              </span>
+            </div>
+
+            <button
+              disabled={page === totalpages}
+              onClick={() => setpage(page + 1)}
+              className={`px-5 py-2 rounded-xl font-medium transition
+              ${
+                page === totalpages
+                  ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                  : "bg-indigo-600 text-white hover:bg-indigo-700"
+              }`}
+            >
+              Next →
+            </button>
+
+          </div>
 
         </div>
 

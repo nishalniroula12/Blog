@@ -10,7 +10,7 @@ const Login = () => {
 
   const [login, setLogin] = useState(null);
   const [loading, setLoading] = useState(false);
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cyan-100 via-white to-blue-100 px-4">
@@ -30,7 +30,7 @@ const Login = () => {
           onSubmit={async (values, { resetForm }) => {
             try {
               setLoading(true);
-
+          
               const res = await axios.post(
                 "http://localhost:4000/api/login",
                 values,
@@ -38,35 +38,31 @@ const Login = () => {
                   withCredentials: true,
                 }
               );
-
+          
               console.log(res.data);
-
-              // FIXED
-
+          
               setLogin(res.data.user);
-              dispatch(loginUser(res.data.user))
-
-
+          
+              // SAVE ONLY USER IN REDUX
+              if (res.data.user.role === "user") {
+                dispatch(loginUser(res.data.user));
+              }
+          
               alert("Login Successful");
+          
               localStorage.setItem("loggedin", "true");
-              console.log(res.data);
-
-              // save user type
-
-              // save token if available
-              alert("Login Successful");
-
-              // redirect
+          
+              // REDIRECT
               if (res.data.user.role === "admin") {
                 navigate("/admindashboard");
               } else {
                 navigate("/");
               }
-
+          
               resetForm();
             } catch (error) {
               console.log(error);
-
+          
               alert(error.response?.data?.message || "Login Failed");
             } finally {
               setLoading(false);

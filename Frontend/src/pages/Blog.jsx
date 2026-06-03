@@ -1,17 +1,18 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AiFillLike, AiOutlineLike } from "react-icons/ai";
 
 const Blog = () => {
-  const [data, setdata] = useState([]);
+  const [data, setData] = useState([]);
   const [allBlogs, setAllBlogs] = useState([]);
   const [likeBlogID, setLikeBlogID] = useState(new Set());
 
-  const [page, setpage] = useState(1);
-  const [totalpages, settotalpages] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
 
-  const [searchVal, setsearchVal] = useState("");
+  const [searchParams] = useSearchParams();
+  const search = searchParams.get("search");
 
   const [user] = useState(
     JSON.parse(localStorage.getItem("user"))
@@ -19,9 +20,22 @@ const Blog = () => {
 
   const nav = useNavigate();
 
-  // ================= FETCH BLOGS =================
-  const fetchblog = async () => {
+  // ================= FETCH BLOGS OR SEARCH =================
+  const fetchData = async () => {
     try {
+      // 🔍 SEARCH MODE
+      if (search) {
+        const res = await axios.get(
+          `http://localhost:4000/api/search?search=${search}`
+        );
+
+        setData(res.data.blogs || []);
+        setAllBlogs(res.data.blogs || []);
+        setTotalPages(0);
+        return;
+      }
+
+      // 📄 NORMAL PAGINATION MODE
       const res = await axios.get(
         "http://localhost:4000/api/getblog",
         {
@@ -33,21 +47,15 @@ const Blog = () => {
         }
       );
 
-      console.log(res.data);
-
-      settotalpages(res.data.totalpages || 0);
-
-      setdata(res.data.blog || []);
-
-      // SAVE ORIGINAL BLOGS
+      setTotalPages(res.data.totalpages || 0);
+      setData(res.data.blog || []);
       setAllBlogs(res.data.blog || []);
-
     } catch (error) {
       console.log(error.response?.data || error.message);
     }
   };
 
-  // ================= FETCH LIKED BLOGS =================
+  // ================= FETCH LIKES =================
   const fetchLikedBlogs = async () => {
     try {
       const res = await axios.get(
@@ -62,48 +70,16 @@ const Blog = () => {
       );
 
       setLikeBlogID(new Set(likedIds));
-
     } catch (error) {
       console.log(error.response?.data || error.message);
     }
   };
 
-  // ================= SEARCH =================
-  const handlesearch = () => {
-    // EMPTY SEARCH
-    if (searchVal.trim() === "") {
-      setdata(allBlogs);
-      return;
-    }
-
-    // FILTER BLOGS
-    const filteredBlogs = allBlogs.filter((item) =>
-      item.title
-        .toLowerCase()
-        .includes(searchVal.toLowerCase())
-    );
-
-    setdata(filteredBlogs);
-  };
-
-  // ================= USE EFFECT =================
-  useEffect(() => {
-    fetchblog();
-
-    if (user) {
-      fetchLikedBlogs();
-    }
-  }, [page]);
-
   // ================= LIKE / UNLIKE =================
-  const handlelike = async (blogId) => {
+  const handleLike = async (blogId) => {
     if (!user) {
-      alert("Please login first to like blog");
-
-      setTimeout(() => {
-        nav("/login");
-      }, 1500);
-
+      alert("Please login first");
+      setTimeout(() => nav("/login"), 1500);
       return;
     }
 
@@ -111,79 +87,60 @@ const Blog = () => {
       const res = await axios.post(
         `http://localhost:4000/api/like/${blogId}`,
         {},
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
 
       const isLiked = res.data.like;
+      const newLikeCount = res.data.likecount;
 
-      const newlikecount = res.data.likecount;
-
-      // UPDATE LIKED STATE
       setLikeBlogID((prev) => {
         const newSet = new Set(prev);
-
-        if (isLiked) {
-          newSet.add(blogId);
-        } else {
-          newSet.delete(blogId);
-        }
-
+        if (isLiked) newSet.add(blogId);
+        else newSet.delete(blogId);
         return newSet;
       });
 
-      // UPDATE LIKE COUNT
-      setdata((prev) =>
+      setData((prev) =>
         prev.map((item) =>
           item._id === blogId
-            ? {
-                ...item,
-                likecount: newlikecount,
-              }
+            ? { ...item, likecount: newLikeCount }
             : item
         )
       );
-
     } catch (error) {
       console.log(error.response?.data || error.message);
     }
   };
 
+  // ================= EFFECT =================
+  useEffect(() => {
+    fetchData();
+
+    if (user) {
+      fetchLikedBlogs();
+    }
+  }, [page, search]);
+
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-5">
 
-      {/* HEADING */}
+      {/* TITLE */}
       <h1 className="text-3xl font-bold text-center mb-10">
         Latest Blogs
       </h1>
 
-      {/* SEARCH */}
-      <div className="flex justify-center gap-3 mb-10">
-        <input
-          type="text"
-          value={searchVal}
-          onChange={(e) =>
-            setsearchVal(e.target.value)
-          }
-          placeholder="Search blogs..."
-          className="w-full max-w-md px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-400"
-        />
+      {/* SEARCH INFO */}
+      {search && (
+        <p className="text-center text-gray-600 mb-5">
+          Search results for: <b>{search}</b>
+        </p>
+      )}
 
-        <button
-          onClick={handlesearch}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-medium"
-        >
-          Search
-        </button>
-      </div>
-
-      {/* BLOGS */}
+      {/* BLOG GRID */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         {data.length > 0 ? (
           data.map((item) => (
-
             <div
               key={item._id}
               className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition"
@@ -217,33 +174,29 @@ const Blog = () => {
                     {item.category?.name}
                   </span>
 
-                  {/* LIKES */}
+                  {/* LIKE COUNT */}
                   <span className="text-xs text-gray-400">
                     {item.likecount || 0} Likes
                   </span>
 
                   {/* LIKE BUTTON */}
                   <button
-                    onClick={() =>
-                      handlelike(item._id)
-                    }
-                    className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 ${
+                    onClick={() => handleLike(item._id)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition ${
                       likeBlogID.has(item._id)
-                        ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md"
-                        : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-md hover:shadow-lg"
+                        ? "bg-pink-500 text-white"
+                        : "bg-blue-500 text-white"
                     }`}
                   >
                     {likeBlogID.has(item._id) ? (
-                      <AiFillLike className="text-lg" />
+                      <AiFillLike />
                     ) : (
-                      <AiOutlineLike className="text-lg" />
+                      <AiOutlineLike />
                     )}
 
-                    <span className="text-sm">
-                      {likeBlogID.has(item._id)
-                        ? "Unlike"
-                        : "Like"}
-                    </span>
+                    {likeBlogID.has(item._id)
+                      ? "Unlike"
+                      : "Like"}
                   </button>
 
                 </div>
@@ -257,42 +210,32 @@ const Blog = () => {
         )}
       </div>
 
-      {/* PAGINATION */}
-      <div className="flex items-center justify-center gap-4 mt-10">
+      {/* PAGINATION (only if NOT searching) */}
+      {!search && (
+        <div className="flex justify-center items-center gap-4 mt-10">
 
-        {/* PREV */}
-        <button
-          disabled={page === 1}
-          onClick={() => setpage(page - 1)}
-          className={`px-5 py-2 rounded-xl font-medium transition ${
-            page === 1
-              ? "bg-slate-200 text-slate-400 cursor-not-allowed"
-              : "bg-indigo-600 text-white hover:bg-indigo-700"
-          }`}
-        >
-          ← Prev
-        </button>
+          <button
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Prev
+          </button>
 
-        {/* PAGE INFO */}
-        <div className="bg-white shadow px-5 py-2 rounded-xl border">
-          <span className="font-semibold text-slate-700">
-            Page {page} of {totalpages}
+          <span>
+            Page {page} of {totalPages}
           </span>
-        </div>
 
-        {/* NEXT */}
-        <button
-          disabled={page >= totalpages}
-          onClick={() => setpage(page + 1)}
-          className={`px-5 py-2 rounded-xl font-medium transition ${
-            page >= totalpages
-              ? "bg-slate-200 text-slate-400 cursor-not-allowed"
-              : "bg-indigo-600 text-white hover:bg-indigo-700"
-          }`}
-        >
-          Next →
-        </button>
-      </div>
+          <button
+            disabled={page >= totalPages}
+            onClick={() => setPage(page + 1)}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+
+        </div>
+      )}
     </div>
   );
 };

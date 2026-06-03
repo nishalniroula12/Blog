@@ -131,6 +131,11 @@ const Allblog = () => {
               }
               placeholder="Search Blog Title"
               className="w-full max-w-md px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            onKeyDown={(e) =>{
+              if(e.key ==="Enter"){
+                handlesearch()
+              }
+            }}
             />
 
             <button

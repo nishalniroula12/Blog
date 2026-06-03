@@ -1,13 +1,14 @@
+import "dotenv/config.js"
+
 import express from "express";
-import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+
 import connectdatabases from "./config/dbs.js";
 import categoryroutes from "./route/categoryroutes.js";
 import blogroutes from "./route/blogpostroutes.js";
 import userroutes from "./route/userroutes.js";
-import cookieParser from "cookie-parser";
-import cors from "cors";
 
-dotenv.config();
 
 const app = express();
 
@@ -17,11 +18,13 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.use("/uploads", express.static("uploads"));
-app.use(cookieParser());
+
 connectdatabases();
 
 app.use("/api", categoryroutes);
@@ -31,12 +34,12 @@ app.use("/api", userroutes);
 app.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "created successful",
+    message: "Server running successfully",
   });
 });
 
-const Port = 4000;
+const PORT = process.env.PORT || 4000;
 
-app.listen(Port, () => {
-  console.log("server is running", Port);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

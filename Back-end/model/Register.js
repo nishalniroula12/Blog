@@ -1,3 +1,4 @@
+
 import mongoose from 'mongoose'
  
 const registers =new mongoose.Schema({
@@ -20,6 +21,23 @@ const registers =new mongoose.Schema({
         enum:["user","admin"],
         default:"user"
     },
+    isVerify:{
+        type:Boolean,
+        default: false
+    },
+    verifyOtp:{
+        type:String,
+    },
+    expireVerifyOtp:{
+        type:Date
+    },
+    otp:{
+        type:String,
+    },
+    otpExpire:{
+        type:Date
+
+    }
 },{timestamps:true})
 const Register =mongoose.model("register",registers)
 export default Register

@@ -1,5 +1,5 @@
 import express from 'express'
-import {  deleteuser, getuserdata, Login, logout, user } from '../controller/User.js'
+import {  deleteuser, forgetpass, getuserdata, Login, logout, resetpassword, user, verifyotped } from '../controller/User.js'
 
 const router =express.Router()
 
@@ -9,5 +9,8 @@ router.delete("/remove/:id", deleteuser)
 
 router.post("/login" ,Login)
 router.post("/logout",logout)
+router.post("/check", verifyotped)
+router.post("/forget" ,forgetpass)
+router.post("/reset" ,resetpassword)
 
 export default router

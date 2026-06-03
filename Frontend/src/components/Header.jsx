@@ -4,6 +4,7 @@ import { FaHeart, FaBars, FaTimes } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { logoutUser } from "../Redux/Slice";
+import Navbar from "./Navbar";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -59,6 +60,10 @@ const Header = () => {
             Blogify
           </h1>
         </div>
+        <div>
+        <Navbar/>
+        </div>
+
 
         {/* ================= DESKTOP MENU ================= */}
 

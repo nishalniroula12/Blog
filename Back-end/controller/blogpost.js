@@ -66,7 +66,39 @@ export const bloggetdata = async (req, res) => {
       }
     };
 
-
+    export const searchblog = async (req, res) => {
+      try {
+        const { search = "" } = req.query;
+    
+        const keyword = search.trim();
+    
+        if (!keyword) {
+          return res.status(200).json({
+            success: true,
+            blogs: [],
+          });
+        }
+    
+        const blogs = await Blog.find({
+          title: {
+            $regex: keyword,
+            $options: "i",
+          },
+        })
+    
+        res.status(200).json({
+          success: true,
+          blogs,
+        });
+      } catch (error) {
+        console.log(error);
+    
+        res.status(500).json({
+          success: false,
+          message: error.message,
+        });
+      }
+    };
 
 //blog get by id
 

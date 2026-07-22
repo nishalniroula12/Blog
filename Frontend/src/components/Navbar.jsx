@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../api/axios";
 
 const Navbar = () => {
   const [search, setSearch] = useState("");
@@ -18,8 +19,8 @@ const Navbar = () => {
       }
 
       try {
-        const res = await axios.get(
-          `http://localhost:4000/api/search?search=${search}`
+        const res = await api.get(
+          `api/search?search=${search}`
         );
 
         setHandle(res.data.blogs || []);

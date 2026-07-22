@@ -14,7 +14,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://blog-pi-red.vercel.app",
     credentials: true,
   })
 );

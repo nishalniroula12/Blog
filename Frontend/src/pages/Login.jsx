@@ -4,6 +4,7 @@ import { Formik } from "formik";
 import { useNavigate, Link, data } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginUser } from "../Redux/Slice";
+import api from "../api/axios";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -31,12 +32,9 @@ const Login = () => {
             try {
               setLoading(true);
           
-              const res = await axios.post(
-                "http://localhost:4000/api/login",
+              const res = await api.post(
+                "api/login",
                 values,
-                {
-                  withCredentials: true,
-                }
               );
           
               console.log(res.data);

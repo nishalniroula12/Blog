@@ -1,7 +1,7 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AiFillLike, AiOutlineLike } from "react-icons/ai";
+import api from "../api/axios";
 
 const Blog = () => {
   const [data, setData] = useState([]);
@@ -25,8 +25,8 @@ const Blog = () => {
     try {
       // 🔍 SEARCH MODE
       if (search) {
-        const res = await axios.get(
-          `http://localhost:4000/api/search?search=${search}`
+        const res = await api.get(
+          `api/search?search=${search}`
         );
 
         setData(res.data.blogs || []);
@@ -36,15 +36,15 @@ const Blog = () => {
       }
 
       // 📄 NORMAL PAGINATION MODE
-      const res = await axios.get(
-        "http://localhost:4000/api/getblog",
+      const res = await api.get(
+        "api/getblog",
         {
-          withCredentials: true,
           params: {
             page,
             limit: 3,
           },
         }
+        
       );
 
       setTotalPages(res.data.totalpages || 0);
@@ -58,11 +58,9 @@ const Blog = () => {
   // ================= FETCH LIKES =================
   const fetchLikedBlogs = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:4000/api/getlike",
-        {
-          withCredentials: true,
-        }
+      const res = await api.get(
+        "api/getlike",
+        
       );
 
       const likedIds = res.data.likeblogs.map(
@@ -84,11 +82,12 @@ const Blog = () => {
     }
 
     try {
-      const res = await axios.post(
-        `http://localhost:4000/api/like/${blogId}`,
+      const res = await api.post(
+        `api/like/${blogId}`,
         {},
-        { withCredentials: true }
+        
       );
+      
 
       const isLiked = res.data.like;
       const newLikeCount = res.data.likecount;

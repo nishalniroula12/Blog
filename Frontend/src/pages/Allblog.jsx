@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import api from "../api/axios";
 
 const Allblog = () => {
   const [data, setData] = useState([]);
@@ -23,15 +24,14 @@ const Allblog = () => {
     try {
       setLoading(true);
 
-      const res = await axios.get(
-        "http://localhost:4000/api/getblog",
-        {
-          withCredentials: true,
+      const res = await api.get(
+      "api/getblog",{
           params: {
             page,
             limit: 2,
           },
         }
+        
       );
 
       settotalpages(res.data.totalpages);
@@ -61,8 +61,8 @@ const Allblog = () => {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(
-        `http://localhost:4000/api/blogdelete/${id}`,
+      await api.delete(
+        `api/blogdelete/${id}`,
         {
           withCredentials: true,
         }

@@ -3,6 +3,7 @@ import { Formik } from "formik";
 import axios from "axios";
 import Sidebar from "./Sidebar";
 import { useNavigate, useParams } from "react-router-dom";
+import api from "../api/axios";
 
 
 const AllCategory = () => {
@@ -20,9 +21,9 @@ const AllCategory = () => {
   // get single category for edit
   const getsinglecategory = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:4000/api/getcategory/${id}`,{withCredentials:true}
-      );
+      const res = await api.get(
+        `api/getcategory/${id}`,
+            );
 
       setInitialValues({
         name: res.data.category.name,
@@ -66,8 +67,8 @@ const AllCategory = () => {
               try {
                 // UPDATE
                 if (iseditmode) {
-                  const res = await axios.put(
-                    `http://localhost:4000/api/updatecategory/${id}`,
+                  const res = await api.put(
+                    `api/updatecategory/${id}`,
                     values,
                     {
                       withCredentials: true,
@@ -82,8 +83,8 @@ const AllCategory = () => {
 
                 // CREATE
                 else {
-                  const res = await axios.post(
-                    "http://localhost:4000/api/createcategory",
+                  const res = await api.post(
+                    "api/createcategory",
                     values
                   );
 

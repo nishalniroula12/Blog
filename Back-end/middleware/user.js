@@ -1,9 +1,14 @@
-import jwt from "jsonwebtoken";
-import Register from "../model/Register.js";
-
+import jwt from 'jsonwebtoken'
+import Register from '../model/Register.js';
+  
 export const authenticate = async (req, res, next) => {
   try {
-    const token = req.cookies.tokens;
+    const token =
+      req.cookies?.tokens ||
+      (req.headers.authorization &&
+        req.headers.authorization.startsWith("Bearer ")
+        ? req.headers.authorization.split(" ")[1]
+        : null);
 
     if (!token) {
       return res.status(401).json({
@@ -33,13 +38,13 @@ export const authenticate = async (req, res, next) => {
   }
 };
 
-export const adminonly = (req, res, next) => {
-  if (req.user?.role === "admin") {
-    next();
-  } else {
-    return res.status(403).json({
-      success: false,
-      message: "Access denied (admin only)",
-    });
-  }
-};
+  export const adminauth = (req, res, next) => {
+    if (req.user?.role === "admin") {
+      next();
+    } else {
+      return res.status(403).json({
+        success: false,
+        message: "access denied",
+      });
+    }
+  };

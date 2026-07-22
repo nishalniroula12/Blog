@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import { useNavigate } from "react-router-dom";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import api from "../api/axios";
 
 const AllCategory = () => {
   const [data, setData] = useState([]);
@@ -20,15 +21,14 @@ const AllCategory = () => {
   // ================= FETCH CATEGORY =================
   const categoryFetch = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:4000/api/getdata",
-        {
-          withCredentials: true,
-          params: {
+      const res = await api.get(
+        "api/getdata",{
+  params: {
             page,
             limit: 2,
           },
         }
+        
       );
 
       settotalpages(res.data.totalpages);
@@ -52,11 +52,9 @@ const AllCategory = () => {
   // ================= DELETE CATEGORY =================
   const deletecategory = async (id) => {
     try {
-      const res = await axios.delete(
-        `http://localhost:4000/api/delete/${id}`,
-        {
-          withCredentials: true,
-        }
+      const res = await api.delete(
+        `api/delete/${id}`,
+        
       );
 
       console.log(res);

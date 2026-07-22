@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import { FaHeart } from "react-icons/fa";
+import api from "../api/axios";
 
 const Likedata = () => {
   const [data, setLikedBlogs] = useState([]);
@@ -11,11 +12,8 @@ const Likedata = () => {
   useEffect(() => {
     const fetchLikes = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:4000/api/getlike",
-          {
-            withCredentials: true,
-          }
+        const res = await api.get(
+          "api/getlike",
         );
 
         console.log("Liked blogs:", res.data);

@@ -19,7 +19,7 @@ export const user = async (req, res) => {
 
     if (existing) {
       return res.status(200).json({
-        success: false,
+        success: false, 
         message: "user already exist",
       });
     }

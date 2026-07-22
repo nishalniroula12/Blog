@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import Sidebar from "./Sidebar";
+import api from "../api/axios";
 
 const BlogForm = () => {
   const navigate = useNavigate();
@@ -23,11 +24,9 @@ const BlogForm = () => {
   useEffect(() => {
     const fetchCategory = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:4000/api/getdata",
-          {
-            withCredentials: true,
-          }
+        const res = await api.get(
+          "api/getdata",
+         
         );
 
         setCategories(res.data.category || []);
@@ -45,11 +44,9 @@ const BlogForm = () => {
 
     const fetchSingleBlog = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:4000/api/blogget/${id}`,
-          {
-            withCredentials: true,
-          }
+        const res = await api.get(
+          `api/blogget/${id}`,
+         
         );
 
         const blog = res.data.blog;
@@ -105,28 +102,17 @@ const BlogForm = () => {
       }
 
       if (isEditMode) {
-        await axios.put(
-          `http://localhost:4000/api/updateblog/${id}`,
+        await api.put(
+          `api/updateblog/${id}`,
           data,
-          {
-            withCredentials: true,
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+             );
 
         alert("Blog Updated Successfully");
       } else {
-        await axios.post(
-          "http://localhost:4000/api/blogcreates",
+        await api.post(
+          "api/blogcreates",
           data,
-          {
-            withCredentials: true,
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
+          
         );
 
         alert("Blog Created Successfully");

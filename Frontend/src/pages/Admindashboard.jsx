@@ -6,6 +6,7 @@ import { FaUserCircle, FaSearch, FaBell, FaCog } from "react-icons/fa";
 import Sidebar from "./Sidebar";
 import { useDispatch } from "react-redux";
 import { logoutUser } from "../Redux/Slice";
+import api from "../api/axios";
 
 function Admindashboard() {
   const navigate = useNavigate();
@@ -36,10 +37,10 @@ function Admindashboard() {
   // LOGOUT
   const logout = async () => {
     try {
-      await axios.post(
-        "http://localhost:4000/api/logout",
+      await api.post(
+        "api/logout",
         {},
-        { withCredentials: true }
+        
       );
 
       localStorage.removeItem("tokens");
@@ -57,12 +58,12 @@ function Admindashboard() {
   const blogfetch = async () => {
     try {
       // BLOG FETCH
-      const res = await axios.get("http://localhost:4000/api/getblog", {
+      const res = await api.get("api/getblog", {
         withCredentials: true,
       });
 
       // CATEGORY FETCH
-      const c = await axios.get("http://localhost:4000/api/getdata", {
+      const c = await api.get("api/getdata", {
         withCredentials: true,
       });
 
@@ -81,7 +82,7 @@ function Admindashboard() {
 
   const fetchlike = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/getlike", {
+      const res = await api.get("api/getlike", {
         withCredentials: true,
       });
       setlike(res.data.likeblogs.length || 0);

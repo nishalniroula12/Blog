@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Header from "../components/Header";
+import api from "../api/axios";
 
 const View = () => {
   const { id } = useParams();
@@ -9,8 +10,8 @@ const View = () => {
 
   const fetchdata = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:4000/api/blogget/${id}`
+      const res = await api.get(
+        `api/blogget/${id}`
       );
 
       setdata(res.data.blog);

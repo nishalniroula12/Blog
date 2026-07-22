@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import api from "../api/axios";
 
 const Homepage = () => {
   const [blog, setblog] = useState([]);
@@ -11,7 +12,7 @@ const Homepage = () => {
 
   const blogfetch = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/getblog",{withCredentials:true});
+      const res = await api.get("api/getblog",);
       setdata(res.data.blog);
     } catch (error) {
       console.log(error);
@@ -20,7 +21,7 @@ const Homepage = () => {
 
   const categoryfetch = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/getdata",{withCredentials:true});
+      const res = await api.get("api/getdata",);
       setblog(res.data.category);
       console.log(res)
     } catch (error) {

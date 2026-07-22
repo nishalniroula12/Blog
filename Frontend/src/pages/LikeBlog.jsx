@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import axios from "axios";
+import api from "../api/axios";
 
 const LikeBlog = () => {
   const [data, setData] = useState([]);
@@ -11,16 +12,16 @@ const LikeBlog = () => {
 
   const blogfetch = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:4000/api/getlike",
+      const res = await api.get(
+        "api/getlike",
         {
-          withCredentials: true,
           params:{
             page,
             limit:3
 
           }
         }
+        
       );
 
       console.log(res.data);

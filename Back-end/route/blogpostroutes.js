@@ -1,10 +1,10 @@
 import express from "express";
 import { blogcreate, bloggetdata, blogupdate, deleted, getblogbyid, getlikeblog, like, searchblog, unlike } from "../controller/blogpost.js";
 import upload from "../middleware/blog.js";
-import { adminonly,authenticate } from "../middleware/user.js";
+import { authenticate } from "../middleware/user.js";
 const router =express.Router()
 
-router.post("/blogcreates",authenticate,adminonly,upload.single("image"), blogcreate)
+router.post("/blogcreates",authenticate,upload.single("image"), blogcreate)
 router.get("/getblog",bloggetdata)
 router.get("/search",searchblog)
 

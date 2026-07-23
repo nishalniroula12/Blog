@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation, Outlet, NavLink } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
-  FaEllipsisV,
+  FaBars,
   FaTimes,
   FaChevronDown,
   FaChevronUp,
@@ -17,326 +17,653 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ==========================================
-  // STATES
-  // ==========================================
-  // Desktop/tablet: start expanded on large screens, collapsed on tablets
-  const [open, setOpen] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth >= 1024 : true
-  );
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [blogDropdown, setBlogDropdown] = useState(false);
-  const [categoryDropdown, setCategoryDropdown] = useState(false);
+  // Desktop sidebar
+  const [open, setOpen] = useState(true);
 
-  // ==========================================
-  // ROUTE CHANGE & ESC KEY LISTENERS
-  // ==========================================
+  // Mobile sidebar
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Dropdowns
+  const [blogDropdown, setBlogDropdown] =
+    useState(false);
+
+  const [categoryDropdown, setCategoryDropdown] =
+    useState(false);
+
+  // =====================================
+  // CLOSE MOBILE SIDEBAR AFTER NAVIGATION
+  // =====================================
+
   useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname]);
 
-  useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [mobileOpen]);
+  // =====================================
+  // OPEN DROPDOWN BASED ON CURRENT PAGE
+  // =====================================
 
-  useEffect(() => {
-    const handleEscape = (event) => {
-      if (event.key === "Escape") {
-        setMobileOpen(false);
-      }
-    };
-
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, []);
-
-  // Keep sidebar state sensible when the window is resized
-  // (e.g. rotating a tablet, or dragging a browser window between sizes)
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 768) {
-        // mobile: sidebar itself is irrelevant, drawer handles it
-        return;
-      }
-      if (window.innerWidth < 1024) {
-        setOpen(false); // tablet: default to collapsed/icon-only
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Auto-expand submenus when visiting matched routes
   useEffect(() => {
     if (
-      ["/allblog", "/adminblog", "/likedata"].some((path) =>
-        location.pathname.startsWith(path)
-      )
+      location.pathname === "/allblog" ||
+      location.pathname === "/adminblog" ||
+      location.pathname === "/likedata"
     ) {
       setBlogDropdown(true);
     }
 
     if (
-      ["/allcategory", "/addcategory"].some((path) =>
-        location.pathname.startsWith(path)
-      )
+      location.pathname === "/allcategory" ||
+      location.pathname === "/addcategory"
     ) {
       setCategoryDropdown(true);
     }
   }, [location.pathname]);
 
-  // ==========================================
-  // LOGOUT HANDLER
-  // ==========================================
+  // =====================================
+  // PREVENT BODY SCROLL ON MOBILE
+  // =====================================
+
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
+  // =====================================
+  // LOGOUT
+  // =====================================
+
   const signout = async () => {
     try {
-      await api.post("/api/logout");
+      await api.post(
+        "/api/logout",
+        {},
+        {
+          withCredentials: true,
+        }
+      );
     } catch (error) {
-      console.error("Logout API failed, logging out locally:", error);
+      console.log(
+        "Logout error:",
+        error
+      );
     } finally {
       localStorage.removeItem("tokens");
       localStorage.removeItem("loggedin");
       localStorage.removeItem("user");
-      setMobileOpen(false);
+
       navigate("/login");
     }
   };
 
-  const closeMobile = () => setMobileOpen(false);
+  // =====================================
+  // CLOSE MOBILE
+  // =====================================
 
-  // NavLink styling generators
-  const navClass = ({ isActive }) => `
-    flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all duration-200 text-sm font-medium
-    ${
-      isActive
-        ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
-        : "text-slate-300 hover:bg-slate-800 hover:text-white"
-    }
-  `;
-
-  const subNavClass = ({ isActive }) => `
-    block w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors
-    ${
-      isActive
-        ? "bg-blue-500/20 text-blue-400 font-semibold"
-        : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-    }
-  `;
+  const closeMobile = () => {
+    setMobileOpen(false);
+  };
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-slate-100 flex flex-col">
-      {/* MOBILE / TABLET TOPBAR */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-slate-900 text-white flex items-center justify-between px-4 z-40 lg:hidden shadow-lg border-b border-slate-800">
-        <div className="min-w-0">
-          <h1 className="text-base font-bold tracking-wide truncate">Admin Panel</h1>
-          <p className="text-[10px] text-slate-400 truncate">Dashboard System</p>
+    <>
+
+      {/* ==================================
+          MOBILE TOP BAR
+      ================================== */}
+
+      <div
+        className="
+          fixed
+          top-0
+          left-0
+          right-0
+          z-40
+          h-16
+          bg-slate-900
+          text-white
+          flex
+          items-center
+          justify-between
+          px-4
+          shadow-lg
+          md:hidden
+        "
+      >
+
+        <div>
+          <h1 className="font-bold text-lg">
+            Admin Panel
+          </h1>
+
+          <p className="text-xs text-slate-400">
+            Dashboard System
+          </p>
         </div>
 
-        {/* THREE DOT MENU TRIGGER */}
         <button
           type="button"
-          onClick={() => setMobileOpen(true)}
-          className="w-10 h-10 shrink-0 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 active:scale-95 transition"
-          aria-label="Open menu"
+          onClick={() =>
+            setMobileOpen(true)
+          }
+          className="
+            w-10
+            h-10
+            rounded-lg
+            bg-slate-800
+            flex
+            items-center
+            justify-center
+          "
         >
-          <FaEllipsisV size={18} />
+          <FaBars />
         </button>
-      </header>
 
-      {/* BACKDROP (mobile + tablet drawer) */}
+      </div>
+
+
+      {/* ==================================
+          MOBILE BACKDROP
+      ================================== */}
+
       {mobileOpen && (
         <div
           onClick={closeMobile}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+          className="
+            fixed
+            inset-0
+            bg-black/50
+            z-40
+            md:hidden
+          "
         />
       )}
 
-      {/* SIDEBAR NAVIGATION */}
+
+      {/* ==================================
+          SIDEBAR
+      ================================== */}
+
       <aside
         className={`
-          fixed top-0 left-0 h-screen h-[100dvh] bg-slate-900 text-white shadow-2xl z-50 flex flex-col
-          transition-all duration-300 ease-in-out border-r border-slate-800
-          w-[82vw] max-w-[300px]
-          ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
-          lg:translate-x-0 lg:max-w-none ${open ? "lg:w-72" : "lg:w-20"}
+          fixed
+          top-0
+          left-0
+          z-50
+          h-screen
+          bg-gradient-to-b
+          from-slate-900
+          to-slate-800
+          text-white
+          shadow-2xl
+          flex
+          flex-col
+
+          w-[280px]
+
+          transition-transform
+          duration-300
+          ease-in-out
+
+          ${
+            mobileOpen
+              ? "translate-x-0"
+              : "-translate-x-full"
+          }
+
+          md:translate-x-0
+
+          ${
+            open
+              ? "md:w-72"
+              : "md:w-20"
+          }
         `}
       >
-        {/* HEADER / LOGO */}
-        <div className="h-16 lg:h-20 flex items-center justify-between px-4 lg:px-5 border-b border-slate-800 shrink-0">
-          {open ? (
-            <div className="min-w-0">
-              <h1 className="text-lg font-bold tracking-wide text-white truncate">
+
+        {/* ==================================
+            SIDEBAR HEADER
+        ================================== */}
+
+        <div
+          className="
+            h-20
+            shrink-0
+            px-5
+            flex
+            items-center
+            justify-between
+            border-b
+            border-slate-700
+          "
+        >
+
+          {open && (
+            <div>
+              <h1 className="text-xl font-bold">
                 Admin Panel
               </h1>
-              <p className="text-slate-400 text-xs truncate">Dashboard System</p>
-            </div>
-          ) : (
-            <div className="mx-auto hidden lg:block">
-              <span className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-white text-sm">
-                AP
-              </span>
+
+              <p className="text-xs text-slate-400 mt-1">
+                Dashboard System
+              </p>
             </div>
           )}
 
-          {/* MOBILE/TABLET CLOSE (three-dot drawer close) */}
+
+          {/* MOBILE CLOSE */}
+
           <button
             type="button"
             onClick={closeMobile}
-            className="lg:hidden w-9 h-9 shrink-0 flex items-center justify-center rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700"
-            aria-label="Close menu"
+            className="
+              md:hidden
+              w-10
+              h-10
+              flex
+              items-center
+              justify-center
+              rounded-lg
+              bg-slate-800
+            "
           >
-            <FaTimes size={16} />
+            <FaTimes />
           </button>
 
-          {/* DESKTOP COLLAPSE TOGGLE */}
+
+          {/* DESKTOP COLLAPSE */}
+
           <button
             type="button"
-            onClick={() => setOpen(!open)}
-            className="hidden lg:flex w-9 h-9 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition"
-            aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
+            onClick={() =>
+              setOpen(!open)
+            }
+            className="
+              hidden
+              md:flex
+              w-10
+              h-10
+              items-center
+              justify-center
+              rounded-lg
+              bg-slate-700
+              hover:bg-slate-600
+            "
           >
-            {open ? <FaTimes size={14} /> : <FaEllipsisV size={14} />}
+            {open ? (
+              <FaTimes />
+            ) : (
+              <FaBars />
+            )}
           </button>
+
         </div>
 
-        {/* NAVIGATION LINKS */}
-        <nav className="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-2 min-h-0">
+
+        {/* ==================================
+            MENU
+        ================================== */}
+
+        <nav
+          className="
+            flex-1
+            overflow-y-auto
+            p-4
+            space-y-3
+          "
+        >
+
           {/* DASHBOARD */}
-          <NavLink
-            to="/admindashboard"
-            onClick={closeMobile}
-            className={navClass}
-            title={!open ? "Dashboard" : undefined}
+
+          <button
+            type="button"
+            onClick={() => {
+              navigate("/admindashboard");
+              closeMobile();
+            }}
+            className="
+              w-full
+              flex
+              items-center
+              gap-3
+              px-4
+              py-3
+              rounded-xl
+              text-slate-300
+              hover:bg-slate-700
+              hover:text-white
+              transition
+            "
           >
-            <FaHome className="text-lg shrink-0" />
-            {open && <span className="truncate">Dashboard</span>}
-          </NavLink>
 
-          {/* BLOGS DROPDOWN */}
+            <FaHome />
+
+            {open && (
+              <span>
+                Dashboard
+              </span>
+            )}
+
+          </button>
+
+
+          {/* BLOG DROPDOWN */}
+
           <div>
+
             <button
               type="button"
               onClick={() => {
-                if (!open) setOpen(true);
-                setBlogDropdown(!blogDropdown);
+
+                if (!open) {
+                  setOpen(true);
+                }
+
+                setBlogDropdown(
+                  !blogDropdown
+                );
+
               }}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition text-sm font-medium"
-              title={!open ? "Blogs" : undefined}
+              className="
+                w-full
+                flex
+                items-center
+                justify-between
+                px-4
+                py-3
+                rounded-xl
+                text-slate-300
+                hover:bg-slate-700
+                hover:text-white
+              "
             >
-              <div className="flex items-center gap-3 min-w-0">
-                <FaBlog className="text-lg shrink-0" />
-                {open && <span className="truncate">Blogs</span>}
+
+              <div
+                className="
+                  flex
+                  items-center
+                  gap-3
+                "
+              >
+
+                <FaBlog />
+
+                {open && (
+                  <span>
+                    Blogs
+                  </span>
+                )}
+
               </div>
-              {open && (
-                <span className="text-xs text-slate-400 shrink-0">
-                  {blogDropdown ? <FaChevronUp /> : <FaChevronDown />}
-                </span>
-              )}
+
+              {open &&
+                (blogDropdown ? (
+                  <FaChevronUp />
+                ) : (
+                  <FaChevronDown />
+                ))}
+
             </button>
 
-            {blogDropdown && open && (
-              <div className="ml-5 mt-1.5 flex flex-col gap-1 border-l-2 border-slate-800 pl-3">
-                <NavLink to="/allblog" onClick={closeMobile} className={subNavClass}>
-                  All Blogs
-                </NavLink>
-                <NavLink to="/adminblog" onClick={closeMobile} className={subNavClass}>
-                  Add Blog
-                </NavLink>
-                <NavLink to="/likedata" onClick={closeMobile} className={subNavClass}>
-                  All Likes
-                </NavLink>
-              </div>
-            )}
+
+            {blogDropdown &&
+              open && (
+
+                <div
+                  className="
+                    ml-6
+                    mt-2
+                    pl-3
+                    border-l
+                    border-slate-700
+                    space-y-1
+                  "
+                >
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigate("/allblog");
+                      closeMobile();
+                    }}
+                    className="
+                      w-full
+                      text-left
+                      px-4
+                      py-2.5
+                      rounded-lg
+                      text-sm
+                      text-slate-300
+                      hover:bg-slate-700
+                    "
+                  >
+                    All Blogs
+                  </button>
+
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigate("/adminblog");
+                      closeMobile();
+                    }}
+                    className="
+                      w-full
+                      text-left
+                      px-4
+                      py-2.5
+                      rounded-lg
+                      text-sm
+                      text-slate-300
+                      hover:bg-slate-700
+                    "
+                  >
+                    Add Blog
+                  </button>
+
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigate("/likedata");
+                      closeMobile();
+                    }}
+                    className="
+                      w-full
+                      text-left
+                      px-4
+                      py-2.5
+                      rounded-lg
+                      text-sm
+                      text-slate-300
+                      hover:bg-slate-700
+                    "
+                  >
+                    All Likes
+                  </button>
+
+                </div>
+
+              )}
+
           </div>
 
-          {/* CATEGORIES DROPDOWN */}
+
+          {/* CATEGORY DROPDOWN */}
+
           <div>
+
             <button
               type="button"
               onClick={() => {
-                if (!open) setOpen(true);
-                setCategoryDropdown(!categoryDropdown);
+
+                if (!open) {
+                  setOpen(true);
+                }
+
+                setCategoryDropdown(
+                  !categoryDropdown
+                );
+
               }}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition text-sm font-medium"
-              title={!open ? "Categories" : undefined}
+              className="
+                w-full
+                flex
+                items-center
+                justify-between
+                px-4
+                py-3
+                rounded-xl
+                text-slate-300
+                hover:bg-slate-700
+                hover:text-white
+              "
             >
-              <div className="flex items-center gap-3 min-w-0">
-                <FaLayerGroup className="text-lg shrink-0" />
-                {open && <span className="truncate">Categories</span>}
+
+              <div
+                className="
+                  flex
+                  items-center
+                  gap-3
+                "
+              >
+
+                <FaLayerGroup />
+
+                {open && (
+                  <span>
+                    Categories
+                  </span>
+                )}
+
               </div>
-              {open && (
-                <span className="text-xs text-slate-400 shrink-0">
-                  {categoryDropdown ? <FaChevronUp /> : <FaChevronDown />}
-                </span>
-              )}
+
+              {open &&
+                (categoryDropdown ? (
+                  <FaChevronUp />
+                ) : (
+                  <FaChevronDown />
+                ))}
+
             </button>
 
-            {categoryDropdown && open && (
-              <div className="ml-5 mt-1.5 flex flex-col gap-1 border-l-2 border-slate-800 pl-3">
-                <NavLink to="/addcategory" onClick={closeMobile} className={subNavClass}>
-                  Add Category
-                </NavLink>
-                <NavLink to="/allcategory" onClick={closeMobile} className={subNavClass}>
-                  All Categories
-                </NavLink>
-              </div>
-            )}
+
+            {categoryDropdown &&
+              open && (
+
+                <div
+                  className="
+                    ml-6
+                    mt-2
+                    pl-3
+                    border-l
+                    border-slate-700
+                    space-y-1
+                  "
+                >
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigate("/addcategory");
+                      closeMobile();
+                    }}
+                    className="
+                      w-full
+                      text-left
+                      px-4
+                      py-2.5
+                      rounded-lg
+                      text-sm
+                      text-slate-300
+                      hover:bg-slate-700
+                    "
+                  >
+                    Add Category
+                  </button>
+
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigate("/allcategory");
+                      closeMobile();
+                    }}
+                    className="
+                      w-full
+                      text-left
+                      px-4
+                      py-2.5
+                      rounded-lg
+                      text-sm
+                      text-slate-300
+                      hover:bg-slate-700
+                    "
+                  >
+                    All Categories
+                  </button>
+
+                </div>
+
+              )}
+
           </div>
+
         </nav>
 
-        {/* LOGOUT / PROFILE FOOTER */}
-        <div className="p-3 border-t border-slate-800 shrink-0">
-          {open ? (
-            <div className="bg-slate-800/60 rounded-xl p-3 flex items-center justify-between gap-3 border border-slate-700/50">
-              <div className="min-w-0">
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
-                  Logged in
-                </p>
-                <h2 className="text-xs font-semibold text-white truncate">
-                  Admin User
-                </h2>
-              </div>
 
-              <button
-                type="button"
-                onClick={signout}
-                className="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white transition"
-                title="Sign out"
-                aria-label="Sign out"
-              >
-                <FaSignOutAlt size={14} />
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={signout}
-              className="hidden lg:flex w-full items-center justify-center p-3 rounded-xl text-red-400 hover:bg-red-500/10 transition"
-              title="Sign out"
-              aria-label="Sign out"
-            >
-              <FaSignOutAlt size={16} />
-            </button>
-          )}
+        {/* ==================================
+            LOGOUT
+        ================================== */}
+
+        <div
+          className="
+            shrink-0
+            p-4
+            border-t
+            border-slate-700
+          "
+        >
+
+          <button
+            type="button"
+            onClick={signout}
+            className="
+              w-full
+              flex
+              items-center
+              justify-center
+              gap-3
+              py-3
+              rounded-xl
+              bg-red-500/10
+              text-red-400
+              hover:bg-red-500
+              hover:text-white
+              transition
+            "
+          >
+
+            <FaSignOutAlt />
+
+            {open && (
+              <span>
+                Sign Out
+              </span>
+            )}
+
+          </button>
+
         </div>
+
       </aside>
 
-      {/* MAIN CONTENT OUTLET */}
-      <main
-        className={`
-          flex-1 min-w-0 transition-all duration-300 pt-16 lg:pt-0
-          ${open ? "lg:ml-72" : "lg:ml-20"}
-        `}
-      >
-        <div className="p-4 sm:p-6 lg:p-8 max-w-full">
-          <Outlet />
-        </div>
-      </main>
-    </div>
+    </>
   );
 };
 

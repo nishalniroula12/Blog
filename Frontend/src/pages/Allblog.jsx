@@ -218,7 +218,7 @@ const Allblog = () => {
                       {/* IMAGE */}
                       <td className="p-4">
                         <img
-                          src={`http://localhost:4000/uploads/${blog.image}`}
+                          src={`${import.meta.env.VITE_RENDER_URL}uploads/${item.image}`}
                           alt={blog.title}
                           className="w-20 h-16 object-cover rounded-lg border"
                         />

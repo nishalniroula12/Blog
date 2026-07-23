@@ -58,9 +58,8 @@ const BlogForm = () => {
         });
 
         if (blog.image) {
-          setPreview(`http://localhost:4000/uploads/${blog.image}`);
-        }
-      } catch (error) {
+          setPreview(`${import.meta.env.VITE_RENDER_URL}/uploads/${blog.image}`);
+        }} catch (error) {
         console.log(error);
       }
     };

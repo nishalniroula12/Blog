@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa";
 
 import api from "../api/axios";
+import Sidebar from "./Sidebar";
 
 const Allblog = () => {
   const navigate = useNavigate();
@@ -289,6 +290,7 @@ const Allblog = () => {
         bg-gray-100
       "
     >
+      <Sidebar/>
 
       {/* =====================================
           HEADER

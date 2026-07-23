@@ -148,7 +148,7 @@ const Blog = () => {
               {/* IMAGE */}
               <img
                 onClick={() => nav(`/view/${item._id}`)}
-                src={`http://localhost:4000/uploads/${item.image}`}
+                src={`${import.meta.env.VITE_RENDER_URL}uploads/${item.image}`}
                 alt={item.title}
                 className="w-full h-48 object-cover cursor-pointer"
               />

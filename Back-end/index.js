@@ -14,7 +14,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://blog-pi-red.vercel.app",
+    origin: "https://blog-six-tau-68.vercel.app",
     credentials: true,
   })
 );

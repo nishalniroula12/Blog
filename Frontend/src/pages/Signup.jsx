@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { useNavigate, Link } from 'react-router-dom';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaUser, FaUserShield } from 'react-icons/fa';
 import api from '../api/axios';
 
 const Signup = () => {
@@ -83,6 +83,7 @@ const Signup = () => {
         {/* Formik Form */}
         <Formik
           initialValues={{
+            role: 'user', // Default role
             username: '',
             email: '',
             password: '',
@@ -94,6 +95,7 @@ const Signup = () => {
               // Strip confirmPassword before sending payload to server
               const { confirmPassword, ...payload } = values;
               
+              // Payload now contains: { role, username, email, password }
               const res = await api.post('api/register', payload);
               console.log(res.data);
               resetForm();
@@ -105,8 +107,41 @@ const Signup = () => {
             }
           }}
         >
-          {({ isSubmitting, errors, touched }) => (
+          {({ isSubmitting, errors, touched, setFieldValue, values }) => (
             <Form className="flex flex-col gap-4">
+
+              {/* ROLE SELECTION TOGGLE */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Register as
+                </label>
+                <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setFieldValue('role', 'user')}
+                    className={`flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all ${
+                      values.role === 'user'
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-800'
+                    }`}
+                  >
+                    <FaUser size={13} />
+                    User
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFieldValue('role', 'admin')}
+                    className={`flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all ${
+                      values.role === 'admin'
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-800'
+                    }`}
+                  >
+                    <FaUserShield size={14} />
+                    Admin
+                  </button>
+                </div>
+              </div>
 
               {/* USERNAME */}
               <div className="flex flex-col gap-1">
@@ -224,7 +259,7 @@ const Signup = () => {
                 disabled={isSubmitting}
                 className="w-full py-3 mt-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50 transition shadow-sm"
               >
-                {isSubmitting ? 'Creating account...' : 'Create account'}
+                {isSubmitting ? 'Creating account...' : `Create ${values.role === 'admin' ? 'Admin' : 'User'} Account`}
               </button>
             </Form>
           )}

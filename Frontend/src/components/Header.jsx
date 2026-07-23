@@ -1,287 +1,254 @@
-import React, { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import { FaHeart, FaBars, FaTimes } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { FaHeart, FaBars, FaTimes, FaUserCircle, FaSignOutAlt } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
 import { logoutUser } from "../Redux/Slice";
-import Navbar from "./Navbar";
+import api from "../api/axios";
 
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
 
-  // REDUX STATE
+  // Redux state extraction
   const isAuthenticate = useSelector(
-    (state) => state.data.isAuthenticate
+    (state) => state.data?.isAuthenticate || state.data?.isAuthenticated
   );
+  const user = useSelector((state) => state.data?.user);
 
-  const user = useSelector((state) => state.data.user);
-
-  console.log(isAuthenticate);
-  console.log(user);
-
-  // MOBILE MENU
+  // Mobile drawer state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // LOGOUT FUNCTION
+  // Auto-close mobile drawer when route changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  // Prevent background scrolling when mobile menu is active
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [mobileMenuOpen]);
+
+  // Logout Handler
   const handleLogout = async () => {
     try {
-      const res = await axios.post(
-        "http://localhost:4000/api/logout"
+      await api.post(
+        "api/logout",
+        {},
+        { withCredentials: true }
       );
-
-      console.log(res.data);
-
-      dispatch(logoutUser());
-
-      navigate("/login");
     } catch (error) {
-      console.log(error);
+      console.error("Logout error:", error);
+    } finally {
+      dispatch(logoutUser());
+      setMobileMenuOpen(false);
+      navigate("/login");
     }
   };
 
-  return (
-    <header className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        
-        {/* ================= LOGO ================= */}
+  // Helper for active NavLink styling
+  const navLinkStyle = ({ isActive }) =>
+    `transition-colors duration-200 text-sm font-semibold tracking-wide ${
+      isActive
+        ? "text-blue-600 font-bold border-b-2 border-blue-600 pb-1"
+        : "text-gray-600 hover:text-blue-600"
+    }`;
 
-        <div
-          className="flex items-center gap-3 cursor-pointer"
-          onClick={() => navigate("/")}
-        >
-          <img
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR63-MFsRn0_jWL46D70ITZomtbQGr3Au9Stw&s"
-            alt="logo"
-            className="w-12 h-12 rounded-full"
+  const mobileNavLinkStyle = ({ isActive }) =>
+    `flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+      isActive
+        ? "bg-blue-50 text-blue-600 font-bold"
+        : "text-gray-700 hover:bg-gray-100"
+    }`;
+
+  return (
+    <>
+      <header className="fixed top-0 left-0 w-full bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          
+          {/* LOGO */}
+          <div
+            className="flex items-center gap-2.5 cursor-pointer select-none group"
+            onClick={() => navigate("/")}
+          >
+            <img
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR63-MFsRn0_jWL46D70ITZomtbQGr3Au9Stw&s"
+              alt="Blogify Logo"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover group-hover:scale-105 transition-transform"
+            />
+            <span className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+              Blogify
+            </span>
+          </div>
+
+          {/* DESKTOP NAVIGATION */}
+          <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
+            <NavLink to="/" className={navLinkStyle}>
+              Home
+            </NavLink>
+            <NavLink to="/blog" className={navLinkStyle}>
+              Blog
+            </NavLink>
+
+            {isAuthenticate ? (
+              <>
+                <NavLink to="/like" className={navLinkStyle}>
+                  <span className="flex items-center gap-1.5">
+                    <FaHeart className="text-red-500 text-xs" />
+                    Like
+                  </span>
+                </NavLink>
+
+                {/* USER BADGE */}
+                <div className="flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full text-xs font-semibold text-gray-700">
+                  <FaUserCircle className="text-base text-blue-600" />
+                  <span className="max-w-[100px] truncate">{user?.name || "User"}</span>
+                </div>
+
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-full shadow-sm hover:shadow transition-all duration-150"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <NavLink to="/about" className={navLinkStyle}>
+                  About
+                </NavLink>
+                <NavLink to="/contact" className={navLinkStyle}>
+                  Contact
+                </NavLink>
+
+                <div className="flex items-center gap-3 ml-2">
+                  <button
+                    onClick={() => navigate("/login")}
+                    className="px-4 py-1.5 text-xs font-semibold text-cyan-600 border border-cyan-500 rounded-full hover:bg-cyan-50 transition"
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={() => navigate("/signup")}
+                    className="px-4 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full hover:opacity-95 shadow-sm hover:shadow transition"
+                  >
+                    Signup
+                  </button>
+                </div>
+              </>
+            )}
+          </nav>
+
+          {/* MOBILE TOGGLE BUTTON */}
+          <button
+            type="button"
+            className="md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? <FaTimes size={22} /> : <FaBars size={22} />}
+          </button>
+        </div>
+      </header>
+
+      {/* MOBILE BACKDROP & OVERLAY MENU */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-40 flex">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+            onClick={() => setMobileMenuOpen(false)}
           />
 
-          <h1 className="text-2xl font-bold text-blue-600">
-            Blogify
-          </h1>
-        </div>
-        <div>
-        <Navbar/>
-        </div>
+          {/* Slide Drawer */}
+          <div className="relative ml-auto w-4/5 max-w-sm bg-white h-full shadow-2xl flex flex-col pt-20 pb-6 px-5 z-50 overflow-y-auto">
+            
+            {/* User Profile Bar (if logged in) */}
+            {isAuthenticate && (
+              <div className="flex items-center gap-3 p-3 mb-4 bg-blue-50/60 rounded-xl border border-blue-100">
+                <FaUserCircle className="text-3xl text-blue-600" />
+                <div className="overflow-hidden">
+                  <p className="text-xs text-gray-500">Signed in as</p>
+                  <p className="text-sm font-bold text-gray-800 truncate">
+                    {user?.name || "User"}
+                  </p>
+                </div>
+              </div>
+            )}
 
-
-        {/* ================= DESKTOP MENU ================= */}
-
-        <nav className="hidden lg:flex items-center gap-6 text-lg font-medium">
-          
-          {/* HOME */}
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              isActive
-                ? "text-blue-600 font-bold"
-                : "hover:text-blue-600"
-            }
-          >
-            Home
-          </NavLink>
-
-          {/* BLOG */}
-          <NavLink
-            to="/blog"
-            className={({ isActive }) =>
-              isActive
-                ? "text-blue-600 font-bold"
-                : "hover:text-blue-600"
-            }
-          >
-            Blog
-          </NavLink>
-
-          {/* ================= IF LOGIN ================= */}
-
-          {isAuthenticate ? (
-            <>
-              {/* LIKE */}
-              <NavLink
-                to="/like"
-                className={({ isActive }) =>
-                  isActive
-                    ? "flex items-center gap-2 text-blue-600 font-bold"
-                    : "flex items-center gap-2 hover:text-blue-600"
-                }
-              >
-                <FaHeart />
-                Like
+            <nav className="flex-1 space-y-1">
+              <NavLink to="/" className={mobileNavLinkStyle}>
+                Home
               </NavLink>
 
-              {/* USER NAME */}
-              <span className="text-gray-700 font-semibold">
-                {user?.name}
-              </span>
-
-              {/* LOGOUT */}
-              <button
-                onClick={handleLogout}
-                className="px-5 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              {/* ABOUT */}
-              <NavLink
-                to="/about"
-                className={({ isActive }) =>
-                  isActive
-                    ? "text-blue-600 font-bold"
-                    : "hover:text-blue-600"
-                }
-              >
-                About
+              <NavLink to="/blog" className={mobileNavLinkStyle}>
+                Blog
               </NavLink>
 
-              {/* CONTACT */}
-              <NavLink
-                to="/contact"
-                className={({ isActive }) =>
-                  isActive
-                    ? "text-blue-600 font-bold"
-                    : "hover:text-blue-600"
-                }
-              >
-                Contact
-              </NavLink>
+              {isAuthenticate ? (
+                <NavLink to="/like" className={mobileNavLinkStyle}>
+                  <FaHeart className="text-red-500" />
+                  Liked Posts
+                </NavLink>
+              ) : (
+                <>
+                  <NavLink to="/about" className={mobileNavLinkStyle}>
+                    About
+                  </NavLink>
+                  <NavLink to="/contact" className={mobileNavLinkStyle}>
+                    Contact
+                  </NavLink>
+                </>
+              )}
+            </nav>
 
-              {/* LOGIN */}
-              <button
-                onClick={() => navigate("/login")}
-                className="px-5 py-2 border border-cyan-500 text-cyan-600 rounded-full hover:bg-cyan-50 transition"
-              >
-                Login
-              </button>
-
-              {/* SIGNUP */}
-              <button
-                onClick={() => navigate("/signup")}
-                className="px-5 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full hover:opacity-90 transition"
-              >
-                Signup
-              </button>
-            </>
-          )}
-        </nav>
-
-        {/* ================= MOBILE BUTTON ================= */}
-
-        <button
-          className="lg:hidden"
-          onClick={() =>
-            setMobileMenuOpen(!mobileMenuOpen)
-          }
-        >
-          {mobileMenuOpen ? (
-            <FaTimes size={24} />
-          ) : (
-            <FaBars size={24} />
-          )}
-        </button>
-      </div>
-
-      {/* ================= MOBILE MENU ================= */}
-
-      {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-t p-4 space-y-4">
-
-          {/* HOME */}
-          <NavLink
-            to="/"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block hover:text-blue-600"
-          >
-            Home
-          </NavLink>
-
-          {/* BLOG */}
-          <NavLink
-            to="/blog"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block hover:text-blue-600"
-          >
-            Blog
-          </NavLink>
-
-          {/* ================= IF LOGIN ================= */}
-
-          {isAuthenticate ? (
-            <>
-              {/* LIKE */}
-              <NavLink
-                to="/like"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block hover:text-blue-600"
-              >
-                ❤️ Like
-              </NavLink>
-
-              {/* USER */}
-              <p className="text-gray-700 font-semibold">
-                {user?.name}
-              </p>
-
-              {/* LOGOUT */}
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full py-2 bg-red-500 text-white rounded"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              {/* ABOUT */}
-              <NavLink
-                to="/about"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block hover:text-blue-600"
-              >
-                About
-              </NavLink>
-
-              {/* CONTACT */}
-              <NavLink
-                to="/contact"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block hover:text-blue-600"
-              >
-                Contact
-              </NavLink>
-
-              {/* LOGIN */}
-              <button
-                onClick={() => {
-                  navigate("/login");
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full py-2 border border-cyan-500 text-cyan-600 rounded"
-              >
-                Login
-              </button>
-
-              {/* SIGNUP */}
-              <button
-                onClick={() => {
-                  navigate("/signup");
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full py-2 bg-blue-500 text-white rounded"
-              >
-                Signup
-              </button>
-            </>
-          )}
+            {/* Bottom Actions */}
+            <div className="pt-4 border-t border-gray-100 space-y-2">
+              {isAuthenticate ? (
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-red-500 hover:bg-red-600 text-white font-semibold text-sm rounded-xl transition shadow-sm"
+                >
+                  <FaSignOutAlt />
+                  Logout
+                </button>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => {
+                      navigate("/login");
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full py-2.5 border border-cyan-500 text-cyan-600 font-semibold text-sm rounded-xl hover:bg-cyan-50 transition"
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigate("/signup");
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold text-sm rounded-xl hover:opacity-90 transition shadow-sm"
+                  >
+                    Signup
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
-    </header>
+
+      {/* Spacer to prevent page content from hiding under fixed navbar */}
+      <div className="h-16" />
+    </>
   );
 };
 

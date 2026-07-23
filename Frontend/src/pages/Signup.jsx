@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Formik } from 'formik';
 import { useNavigate } from 'react-router-dom';
+import api from '../api/axios';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ const Signup = () => {
           initialValues={{ username: '', email: '', password: '' }}
           onSubmit={async (values, { resetForm }) => {
             try {
-              const res = await axios.post('http://localhost:5000/api/register', values);
+              const res = await api.post('api/register', values);
               console.log(res.data);
               resetForm();
               setTimeout(() => navigate('/login'), 100);

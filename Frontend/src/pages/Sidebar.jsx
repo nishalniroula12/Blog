@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
 import {
   FaBars,
   FaTimes,
@@ -11,45 +10,63 @@ import {
   FaSignOutAlt,
 } from "react-icons/fa";
 
+import { useLocation, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Desktop sidebar
+  // ==========================================
+  // DESKTOP SIDEBAR STATE
+  // ==========================================
+
   const [open, setOpen] = useState(true);
 
-  // Mobile sidebar
-  const [mobileOpen, setMobileOpen] = useState(false);
+  // ==========================================
+  // MOBILE SIDEBAR STATE
+  // ==========================================
 
-  // Dropdowns
+  const [mobileOpen, setMobileOpen] =
+    useState(false);
+
+  // ==========================================
+  // DROPDOWN STATES
+  // ==========================================
+
   const [blogDropdown, setBlogDropdown] =
     useState(false);
 
   const [categoryDropdown, setCategoryDropdown] =
     useState(false);
 
-  // =====================================
-  // CLOSE MOBILE SIDEBAR AFTER NAVIGATION
-  // =====================================
+
+  // ==========================================
+  // CLOSE MOBILE SIDEBAR WHEN ROUTE CHANGES
+  // ==========================================
 
   useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname]);
 
-  // =====================================
-  // OPEN DROPDOWN BASED ON CURRENT PAGE
-  // =====================================
+
+  // ==========================================
+  // OPEN DROPDOWN BASED ON CURRENT ROUTE
+  // ==========================================
 
   useEffect(() => {
+
     if (
       location.pathname === "/allblog" ||
       location.pathname === "/adminblog" ||
+      location.pathname.startsWith(
+        "/adminblog/"
+      ) ||
       location.pathname === "/likedata"
     ) {
       setBlogDropdown(true);
     }
+
 
     if (
       location.pathname === "/allcategory" ||
@@ -57,30 +74,39 @@ const Sidebar = () => {
     ) {
       setCategoryDropdown(true);
     }
+
   }, [location.pathname]);
 
-  // =====================================
-  // PREVENT BODY SCROLL ON MOBILE
-  // =====================================
+
+  // ==========================================
+  // PREVENT BODY SCROLL WHEN MOBILE SIDEBAR OPEN
+  // ==========================================
 
   useEffect(() => {
+
     if (mobileOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow =
+        "hidden";
     } else {
-      document.body.style.overflow = "";
+      document.body.style.overflow =
+        "";
     }
 
     return () => {
       document.body.style.overflow = "";
     };
+
   }, [mobileOpen]);
 
-  // =====================================
-  // LOGOUT
-  // =====================================
+
+  // ==========================================
+  // SIGN OUT
+  // ==========================================
 
   const signout = async () => {
+
     try {
+
       await api.post(
         "/api/logout",
         {},
@@ -88,34 +114,68 @@ const Sidebar = () => {
           withCredentials: true,
         }
       );
+
     } catch (error) {
+
       console.log(
         "Logout error:",
         error
       );
-    } finally {
-      localStorage.removeItem("tokens");
-      localStorage.removeItem("loggedin");
-      localStorage.removeItem("user");
 
-      navigate("/login");
+    } finally {
+
+      localStorage.removeItem(
+        "tokens"
+      );
+
+      localStorage.removeItem(
+        "loggedin"
+      );
+
+      localStorage.removeItem(
+        "user"
+      );
+
+      navigate(
+        "/login",
+        {
+          replace: true,
+        }
+      );
+
     }
+
   };
 
-  // =====================================
-  // CLOSE MOBILE
-  // =====================================
+
+  // ==========================================
+  // CLOSE MOBILE SIDEBAR
+  // ==========================================
 
   const closeMobile = () => {
     setMobileOpen(false);
   };
 
+
+  // ==========================================
+  // NAVIGATION FUNCTION
+  // ==========================================
+
+  const goTo = (path) => {
+
+    navigate(path);
+
+    setMobileOpen(false);
+
+  };
+
+
   return (
     <>
-
-      {/* ==================================
+      {/* =====================================================
           MOBILE TOP BAR
-      ================================== */}
+          ONLY SHOWS ON MOBILE
+      ====================================================== */}
 
       <div
         className="
@@ -124,30 +184,62 @@ const Sidebar = () => {
           left-0
           right-0
           z-40
-          h-16
+          h-14
           bg-slate-900
           text-white
           flex
           items-center
           justify-between
           px-4
-          shadow-lg
+          shadow-md
           md:hidden
         "
       >
 
-        <div>
-          <h1 className="font-bold text-lg">
-            Admin Panel
-          </h1>
+        {/* MOBILE ADMIN LOGO */}
 
-          <p className="text-xs text-slate-400">
-            Dashboard System
-          </p>
+        <div
+          className="
+            flex
+            items-center
+            gap-2
+          "
+        >
+
+          <div
+            className="
+              w-9
+              h-9
+              rounded-lg
+              bg-blue-600
+              flex
+              items-center
+              justify-center
+              font-bold
+              text-sm
+              shadow
+            "
+          >
+            AD
+          </div>
+
+          <span
+            className="
+              font-semibold
+              text-base
+            "
+          >
+            Admin Panel
+          </span>
+
         </div>
+
+
+        {/* MOBILE MENU BUTTON */}
 
         <button
           type="button"
+          aria-label="Open sidebar"
           onClick={() =>
             setMobileOpen(true)
           }
@@ -156,38 +248,83 @@ const Sidebar = () => {
             h-10
             rounded-lg
             bg-slate-800
+            hover:bg-slate-700
             flex
             items-center
             justify-center
+            transition
           "
         >
-          <FaBars />
+
+          {/* THREE DOTS */}
+
+          <div
+            className="
+              flex
+              flex-col
+              gap-1
+            "
+          >
+
+            <span
+              className="
+                w-1.5
+                h-1.5
+                bg-white
+                rounded-full
+              "
+            />
+
+            <span
+              className="
+                w-1.5
+                h-1.5
+                bg-white
+                rounded-full
+              "
+            />
+
+            <span
+              className="
+                w-1.5
+                h-1.5
+                bg-white
+                rounded-full
+              "
+            />
+
+          </div>
+
         </button>
 
       </div>
 
 
-      {/* ==================================
+      {/* =====================================================
           MOBILE BACKDROP
-      ================================== */}
+          CLICK OUTSIDE SIDEBAR TO CLOSE
+      ====================================================== */}
 
       {mobileOpen && (
+
         <div
           onClick={closeMobile}
           className="
             fixed
             inset-0
-            bg-black/50
             z-40
+            bg-black/50
+            backdrop-blur-[2px]
             md:hidden
           "
         />
+
       )}
 
 
-      {/* ==================================
+      {/* =====================================================
           SIDEBAR
-      ================================== */}
+      ====================================================== */}
 
       <aside
         className={`
@@ -196,17 +333,20 @@ const Sidebar = () => {
           left-0
           z-50
           h-screen
+
           bg-gradient-to-b
           from-slate-900
           to-slate-800
+
           text-white
           shadow-2xl
+
           flex
           flex-col
 
           w-[280px]
 
-          transition-transform
+          transition-all
           duration-300
           ease-in-out
 
@@ -226,9 +366,9 @@ const Sidebar = () => {
         `}
       >
 
-        {/* ==================================
+        {/* =====================================================
             SIDEBAR HEADER
-        ================================== */}
+        ====================================================== */}
 
         <div
           className="
@@ -243,43 +383,69 @@ const Sidebar = () => {
           "
         >
 
+          {/* ADMIN TEXT */}
+
           {open && (
+
             <div>
-              <h1 className="text-xl font-bold">
+
+              <h1
+                className="
+                  text-xl
+                  font-bold
+                  tracking-wide
+                "
+              >
                 Admin Panel
               </h1>
 
-              <p className="text-xs text-slate-400 mt-1">
+              <p
+                className="
+                  text-xs
+                  text-slate-400
+                  mt-1
+                "
+              >
                 Dashboard System
               </p>
+
             </div>
+
           )}
 
 
-          {/* MOBILE CLOSE */}
+          {/* ================================================
+              MOBILE CLOSE BUTTON
+          ================================================= */}
 
           <button
             type="button"
+            aria-label="Close sidebar"
             onClick={closeMobile}
             className="
               md:hidden
               w-10
               h-10
+              rounded-lg
+              bg-slate-800
+              hover:bg-slate-700
               flex
               items-center
               justify-center
-              rounded-lg
-              bg-slate-800
+              transition
             "
           >
             <FaTimes />
           </button>
 
 
-          {/* DESKTOP COLLAPSE */}
+          {/* ================================================
+              DESKTOP COLLAPSE BUTTON
+          ================================================= */}
 
           <button
             type="button"
+            aria-label="Toggle sidebar"
             onClick={() =>
               setOpen(!open)
             }
@@ -288,45 +454,52 @@ const Sidebar = () => {
               md:flex
               w-10
               h-10
-              items-center
-              justify-center
               rounded-lg
               bg-slate-700
               hover:bg-slate-600
+              items-center
+              justify-center
+              transition
             "
           >
+
             {open ? (
               <FaTimes />
             ) : (
               <FaBars />
             )}
+
           </button>
 
         </div>
 
 
-        {/* ==================================
-            MENU
-        ================================== */}
+        {/* =====================================================
+            SIDEBAR MENU
+        ====================================================== */}
 
         <nav
           className="
             flex-1
             overflow-y-auto
+            overflow-x-hidden
             p-4
             space-y-3
           "
         >
 
-          {/* DASHBOARD */}
+          {/* ==================================================
+              DASHBOARD
+          =================================================== */}
 
           <button
             type="button"
-            onClick={() => {
-              navigate("/admindashboard");
-              closeMobile();
-            }}
-            className="
+            onClick={() =>
+              goTo(
+                "/admindashboard"
+              )
+            }
+            className={`
               w-full
               flex
               items-center
@@ -334,17 +507,32 @@ const Sidebar = () => {
               px-4
               py-3
               rounded-xl
-              text-slate-300
-              hover:bg-slate-700
-              hover:text-white
               transition
-            "
+              duration-200
+
+              ${
+                location.pathname ===
+                "/admindashboard"
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "text-slate-300 hover:bg-slate-700 hover:text-white"
+              }
+            `}
           >
 
-            <FaHome />
+            <FaHome
+              className="
+                text-lg
+                shrink-0
+              "
+            />
 
             {open && (
-              <span>
+              <span
+                className="
+                  font-medium
+                  whitespace-nowrap
+                "
+              >
                 Dashboard
               </span>
             )}
@@ -352,7 +540,9 @@ const Sidebar = () => {
           </button>
 
 
-          {/* BLOG DROPDOWN */}
+          {/* ==================================================
+              BLOG DROPDOWN
+          =================================================== */}
 
           <div>
 
@@ -380,6 +570,7 @@ const Sidebar = () => {
                 text-slate-300
                 hover:bg-slate-700
                 hover:text-white
+                transition
               "
             >
 
@@ -391,25 +582,45 @@ const Sidebar = () => {
                 "
               >
 
-                <FaBlog />
+                <FaBlog
+                  className="
+                    text-lg
+                    shrink-0
+                  "
+                />
 
                 {open && (
-                  <span>
+                  <span
+                    className="
+                      font-medium
+                      whitespace-nowrap
+                    "
+                  >
                     Blogs
                   </span>
                 )}
 
               </div>
 
-              {open &&
-                (blogDropdown ? (
-                  <FaChevronUp />
+
+              {open && (
+
+                blogDropdown ? (
+                  <FaChevronUp
+                    className="text-sm"
+                  />
                 ) : (
-                  <FaChevronDown />
-                ))}
+                  <FaChevronDown
+                    className="text-sm"
+                  />
+                )
+
+              )}
 
             </button>
 
+
+            {/* BLOG SUBMENU */}
 
             {blogDropdown &&
               open && (
@@ -425,64 +636,91 @@ const Sidebar = () => {
                   "
                 >
 
+                  {/* ALL BLOGS */}
+
                   <button
                     type="button"
-                    onClick={() => {
-                      navigate("/allblog");
-                      closeMobile();
-                    }}
-                    className="
+                    onClick={() =>
+                      goTo(
+                        "/allblog"
+                      )
+                    }
+                    className={`
                       w-full
                       text-left
                       px-4
                       py-2.5
                       rounded-lg
                       text-sm
-                      text-slate-300
-                      hover:bg-slate-700
-                    "
+                      transition
+
+                      ${
+                        location.pathname ===
+                        "/allblog"
+                          ? "bg-blue-600 text-white"
+                          : "text-slate-300 hover:bg-slate-700 hover:text-white"
+                      }
+                    `}
                   >
                     All Blogs
                   </button>
 
 
+                  {/* ADD BLOG */}
+
                   <button
                     type="button"
-                    onClick={() => {
-                      navigate("/adminblog");
-                      closeMobile();
-                    }}
-                    className="
+                    onClick={() =>
+                      goTo(
+                        "/adminblog"
+                      )
+                    }
+                    className={`
                       w-full
                       text-left
                       px-4
                       py-2.5
                       rounded-lg
                       text-sm
-                      text-slate-300
-                      hover:bg-slate-700
-                    "
+                      transition
+
+                      ${
+                        location.pathname ===
+                        "/adminblog"
+                          ? "bg-blue-600 text-white"
+                          : "text-slate-300 hover:bg-slate-700 hover:text-white"
+                      }
+                    `}
                   >
                     Add Blog
                   </button>
 
 
+                  {/* ALL LIKES */}
+
                   <button
                     type="button"
-                    onClick={() => {
-                      navigate("/likedata");
-                      closeMobile();
-                    }}
-                    className="
+                    onClick={() =>
+                      goTo(
+                        "/likedata"
+                      )
+                    }
+                    className={`
                       w-full
                       text-left
                       px-4
                       py-2.5
                       rounded-lg
                       text-sm
-                      text-slate-300
-                      hover:bg-slate-700
-                    "
+                      transition
+
+                      ${
+                        location.pathname ===
+                        "/likedata"
+                          ? "bg-blue-600 text-white"
+                          : "text-slate-300 hover:bg-slate-700 hover:text-white"
+                      }
+                    `}
                   >
                     All Likes
                   </button>
@@ -494,7 +732,9 @@ const Sidebar = () => {
           </div>
 
 
-          {/* CATEGORY DROPDOWN */}
+          {/* ==================================================
+              CATEGORY DROPDOWN
+          =================================================== */}
 
           <div>
 
@@ -522,6 +762,7 @@ const Sidebar = () => {
                 text-slate-300
                 hover:bg-slate-700
                 hover:text-white
+                transition
               "
             >
 
@@ -533,25 +774,45 @@ const Sidebar = () => {
                 "
               >
 
-                <FaLayerGroup />
+                <FaLayerGroup
+                  className="
+                    text-lg
+                    shrink-0
+                  "
+                />
 
                 {open && (
-                  <span>
+                  <span
+                    className="
+                      font-medium
+                      whitespace-nowrap
+                    "
+                  >
                     Categories
                   </span>
                 )}
 
               </div>
 
-              {open &&
-                (categoryDropdown ? (
-                  <FaChevronUp />
+
+              {open && (
+
+                categoryDropdown ? (
+                  <FaChevronUp
+                    className="text-sm"
+                  />
                 ) : (
-                  <FaChevronDown />
-                ))}
+                  <FaChevronDown
+                    className="text-sm"
+                  />
+                )
+
+              )}
 
             </button>
 
+
+            {/* CATEGORY SUBMENU */}
 
             {categoryDropdown &&
               open && (
@@ -567,43 +828,61 @@ const Sidebar = () => {
                   "
                 >
 
+                  {/* ADD CATEGORY */}
+
                   <button
                     type="button"
-                    onClick={() => {
-                      navigate("/addcategory");
-                      closeMobile();
-                    }}
-                    className="
+                    onClick={() =>
+                      goTo(
+                        "/addcategory"
+                      )
+                    }
+                    className={`
                       w-full
                       text-left
                       px-4
                       py-2.5
                       rounded-lg
                       text-sm
-                      text-slate-300
-                      hover:bg-slate-700
-                    "
+                      transition
+
+                      ${
+                        location.pathname ===
+                        "/addcategory"
+                          ? "bg-blue-600 text-white"
+                          : "text-slate-300 hover:bg-slate-700 hover:text-white"
+                      }
+                    `}
                   >
                     Add Category
                   </button>
 
 
+                  {/* ALL CATEGORY */}
+
                   <button
                     type="button"
-                    onClick={() => {
-                      navigate("/allcategory");
-                      closeMobile();
-                    }}
-                    className="
+                    onClick={() =>
+                      goTo(
+                        "/allcategory"
+                      )
+                    }
+                    className={`
                       w-full
                       text-left
                       px-4
                       py-2.5
                       rounded-lg
                       text-sm
-                      text-slate-300
-                      hover:bg-slate-700
-                    "
+                      transition
+
+                      ${
+                        location.pathname ===
+                        "/allcategory"
+                          ? "bg-blue-600 text-white"
+                          : "text-slate-300 hover:bg-slate-700 hover:text-white"
+                      }
+                    `}
                   >
                     All Categories
                   </button>
@@ -617,9 +896,9 @@ const Sidebar = () => {
         </nav>
 
 
-        {/* ==================================
-            LOGOUT
-        ================================== */}
+        {/* =====================================================
+            BOTTOM SIGN OUT
+        ====================================================== */}
 
         <div
           className="
@@ -646,13 +925,18 @@ const Sidebar = () => {
               hover:bg-red-500
               hover:text-white
               transition
+              duration-200
             "
           >
 
             <FaSignOutAlt />
 
             {open && (
-              <span>
+              <span
+                className="
+                  font-medium
+                "
+              >
                 Sign Out
               </span>
             )}

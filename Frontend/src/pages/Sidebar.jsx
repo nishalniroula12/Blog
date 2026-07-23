@@ -18,20 +18,19 @@ const Sidebar = () => {
   const location = useLocation();
 
   // ==========================================
-  // DESKTOP SIDEBAR STATE
+  // DESKTOP SIDEBAR OPEN/CLOSE
   // ==========================================
 
   const [open, setOpen] = useState(true);
 
   // ==========================================
-  // MOBILE SIDEBAR STATE
+  // MOBILE SIDEBAR OPEN/CLOSE
   // ==========================================
 
-  const [mobileOpen, setMobileOpen] =
-    useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   // ==========================================
-  // DROPDOWN STATES
+  // DROPDOWNS
   // ==========================================
 
   const [blogDropdown, setBlogDropdown] =
@@ -42,7 +41,7 @@ const Sidebar = () => {
 
 
   // ==========================================
-  // CLOSE MOBILE SIDEBAR WHEN ROUTE CHANGES
+  // CLOSE MOBILE SIDEBAR WHEN PAGE CHANGES
   // ==========================================
 
   useEffect(() => {
@@ -51,7 +50,7 @@ const Sidebar = () => {
 
 
   // ==========================================
-  // OPEN DROPDOWN BASED ON CURRENT ROUTE
+  // AUTO OPEN DROPDOWN BASED ON CURRENT PAGE
   // ==========================================
 
   useEffect(() => {
@@ -59,14 +58,11 @@ const Sidebar = () => {
     if (
       location.pathname === "/allblog" ||
       location.pathname === "/adminblog" ||
-      location.pathname.startsWith(
-        "/adminblog/"
-      ) ||
+      location.pathname.startsWith("/adminblog/") ||
       location.pathname === "/likedata"
     ) {
       setBlogDropdown(true);
     }
-
 
     if (
       location.pathname === "/allcategory" ||
@@ -79,17 +75,16 @@ const Sidebar = () => {
 
 
   // ==========================================
-  // PREVENT BODY SCROLL WHEN MOBILE SIDEBAR OPEN
+  // PREVENT BACKGROUND SCROLL
+  // WHEN MOBILE SIDEBAR IS OPEN
   // ==========================================
 
   useEffect(() => {
 
     if (mobileOpen) {
-      document.body.style.overflow =
-        "hidden";
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow =
-        "";
+      document.body.style.overflow = "";
     }
 
     return () => {
@@ -100,7 +95,21 @@ const Sidebar = () => {
 
 
   // ==========================================
-  // SIGN OUT
+  // NAVIGATION
+  // ==========================================
+
+  const goTo = (path) => {
+
+    navigate(path);
+
+    // Close mobile sidebar
+    setMobileOpen(false);
+
+  };
+
+
+  // ==========================================
+  // LOGOUT
   // ==========================================
 
   const signout = async () => {
@@ -124,17 +133,13 @@ const Sidebar = () => {
 
     } finally {
 
-      localStorage.removeItem(
-        "tokens"
-      );
+      localStorage.removeItem("tokens");
 
-      localStorage.removeItem(
-        "loggedin"
-      );
+      localStorage.removeItem("loggedin");
 
-      localStorage.removeItem(
-        "user"
-      );
+      localStorage.removeItem("user");
+
+      setMobileOpen(false);
 
       navigate(
         "/login",
@@ -148,33 +153,12 @@ const Sidebar = () => {
   };
 
 
-  // ==========================================
-  // CLOSE MOBILE SIDEBAR
-  // ==========================================
-
-  const closeMobile = () => {
-    setMobileOpen(false);
-  };
-
-
-  // ==========================================
-  // NAVIGATION FUNCTION
-  // ==========================================
-
-  const goTo = (path) => {
-
-    navigate(path);
-
-    setMobileOpen(false);
-
-  };
-
-
   return (
     <>
       {/* =====================================================
-          MOBILE TOP BAR
-          ONLY SHOWS ON MOBILE
+          MOBILE NAVBAR
+          THIS IS ONLY FOR MOBILE
+          HEIGHT = 64PX
       ====================================================== */}
 
       <div
@@ -183,20 +167,25 @@ const Sidebar = () => {
           top-0
           left-0
           right-0
-          z-40
-          h-14
+          h-16
+          z-[100]
+
           bg-slate-900
           text-white
+
           flex
           items-center
           justify-between
+
           px-4
+
           shadow-md
+
           md:hidden
         "
       >
 
-        {/* MOBILE ADMIN LOGO */}
+        {/* MOBILE LOGO */}
 
         <div
           className="
@@ -210,14 +199,17 @@ const Sidebar = () => {
             className="
               w-9
               h-9
+
               rounded-lg
+
               bg-blue-600
+
               flex
               items-center
               justify-center
+
               font-bold
               text-sm
-              shadow
             "
           >
             AD
@@ -235,28 +227,30 @@ const Sidebar = () => {
         </div>
 
 
-        {/* MOBILE MENU BUTTON */}
+        {/* MOBILE THREE DOT MENU */}
 
         <button
           type="button"
-          aria-label="Open sidebar"
           onClick={() =>
             setMobileOpen(true)
           }
+          aria-label="Open menu"
           className="
             w-10
             h-10
+
             rounded-lg
+
             bg-slate-800
             hover:bg-slate-700
+
             flex
             items-center
             justify-center
+
             transition
           "
         >
-
-          {/* THREE DOTS */}
 
           <div
             className="
@@ -302,19 +296,22 @@ const Sidebar = () => {
 
       {/* =====================================================
           MOBILE BACKDROP
-          CLICK OUTSIDE SIDEBAR TO CLOSE
       ====================================================== */}
 
       {mobileOpen && (
 
         <div
-          onClick={closeMobile}
+          onClick={() =>
+            setMobileOpen(false)
+          }
           className="
             fixed
             inset-0
-            z-40
+
+            z-[110]
+
             bg-black/50
-            backdrop-blur-[2px]
+
             md:hidden
           "
         />
@@ -324,21 +321,31 @@ const Sidebar = () => {
 
       {/* =====================================================
           SIDEBAR
+          
+          IMPORTANT:
+          top-16 = 64PX BELOW NAVBAR
+          
+          h-[calc(100vh-4rem)]
+          = FULL SCREEN MINUS 64PX
       ====================================================== */}
 
       <aside
         className={`
           fixed
-          top-0
+
+          top-16
           left-0
-          z-50
-          h-screen
+
+          h-[calc(100vh-4rem)]
+
+          z-[120]
 
           bg-gradient-to-b
           from-slate-900
           to-slate-800
 
           text-white
+
           shadow-2xl
 
           flex
@@ -374,16 +381,19 @@ const Sidebar = () => {
           className="
             h-20
             shrink-0
+
             px-5
+
             flex
             items-center
             justify-between
+
             border-b
             border-slate-700
           "
         >
 
-          {/* ADMIN TEXT */}
+          {/* TITLE */}
 
           {open && (
 
@@ -414,52 +424,54 @@ const Sidebar = () => {
           )}
 
 
-          {/* ================================================
-              MOBILE CLOSE BUTTON
-          ================================================= */}
+          {/* MOBILE CLOSE */}
 
           <button
             type="button"
-            aria-label="Close sidebar"
-            onClick={closeMobile}
+            onClick={() =>
+              setMobileOpen(false)
+            }
             className="
               md:hidden
+
               w-10
               h-10
+
               rounded-lg
+
               bg-slate-800
               hover:bg-slate-700
+
               flex
               items-center
               justify-center
-              transition
             "
           >
             <FaTimes />
           </button>
 
 
-          {/* ================================================
-              DESKTOP COLLAPSE BUTTON
-          ================================================= */}
+          {/* DESKTOP COLLAPSE */}
 
           <button
             type="button"
-            aria-label="Toggle sidebar"
             onClick={() =>
               setOpen(!open)
             }
             className="
               hidden
               md:flex
+
               w-10
               h-10
+
               rounded-lg
+
               bg-slate-700
               hover:bg-slate-600
+
               items-center
               justify-center
-              transition
             "
           >
 
@@ -475,15 +487,18 @@ const Sidebar = () => {
 
 
         {/* =====================================================
-            SIDEBAR MENU
+            MENU
         ====================================================== */}
 
         <nav
           className="
             flex-1
+
             overflow-y-auto
             overflow-x-hidden
+
             p-4
+
             space-y-3
           "
         >
@@ -495,25 +510,26 @@ const Sidebar = () => {
           <button
             type="button"
             onClick={() =>
-              goTo(
-                "/admindashboard"
-              )
+              goTo("/admindashboard")
             }
             className={`
               w-full
+
               flex
               items-center
               gap-3
+
               px-4
               py-3
+
               rounded-xl
+
               transition
-              duration-200
 
               ${
                 location.pathname ===
                 "/admindashboard"
-                  ? "bg-blue-600 text-white shadow-md"
+                  ? "bg-blue-600 text-white"
                   : "text-slate-300 hover:bg-slate-700 hover:text-white"
               }
             `}
@@ -527,6 +543,7 @@ const Sidebar = () => {
             />
 
             {open && (
+
               <span
                 className="
                   font-medium
@@ -535,13 +552,14 @@ const Sidebar = () => {
               >
                 Dashboard
               </span>
+
             )}
 
           </button>
 
 
           {/* ==================================================
-              BLOG DROPDOWN
+              BLOGS
           =================================================== */}
 
           <div>
@@ -561,15 +579,21 @@ const Sidebar = () => {
               }}
               className="
                 w-full
+
                 flex
                 items-center
                 justify-between
+
                 px-4
                 py-3
+
                 rounded-xl
+
                 text-slate-300
+
                 hover:bg-slate-700
                 hover:text-white
+
                 transition
               "
             >
@@ -590,6 +614,7 @@ const Sidebar = () => {
                 />
 
                 {open && (
+
                   <span
                     className="
                       font-medium
@@ -598,6 +623,7 @@ const Sidebar = () => {
                   >
                     Blogs
                   </span>
+
                 )}
 
               </div>
@@ -606,13 +632,9 @@ const Sidebar = () => {
               {open && (
 
                 blogDropdown ? (
-                  <FaChevronUp
-                    className="text-sm"
-                  />
+                  <FaChevronUp />
                 ) : (
-                  <FaChevronDown
-                    className="text-sm"
-                  />
+                  <FaChevronDown />
                 )
 
               )}
@@ -620,7 +642,7 @@ const Sidebar = () => {
             </button>
 
 
-            {/* BLOG SUBMENU */}
+            {/* BLOG MENU */}
 
             {blogDropdown &&
               open && (
@@ -630,28 +652,33 @@ const Sidebar = () => {
                     ml-6
                     mt-2
                     pl-3
+
                     border-l
                     border-slate-700
+
                     space-y-1
                   "
                 >
 
-                  {/* ALL BLOGS */}
+                  {/* ALL BLOG */}
 
                   <button
                     type="button"
                     onClick={() =>
-                      goTo(
-                        "/allblog"
-                      )
+                      goTo("/allblog")
                     }
                     className={`
                       w-full
+
                       text-left
+
                       px-4
                       py-2.5
+
                       rounded-lg
+
                       text-sm
+
                       transition
 
                       ${
@@ -671,26 +698,26 @@ const Sidebar = () => {
                   <button
                     type="button"
                     onClick={() =>
-                      goTo(
-                        "/adminblog"
-                      )
+                      goTo("/adminblog")
                     }
-                    className={`
+                    className="
                       w-full
                       text-left
+
                       px-4
                       py-2.5
-                      rounded-lg
-                      text-sm
-                      transition
 
-                      ${
-                        location.pathname ===
-                        "/adminblog"
-                          ? "bg-blue-600 text-white"
-                          : "text-slate-300 hover:bg-slate-700 hover:text-white"
-                      }
-                    `}
+                      rounded-lg
+
+                      text-sm
+
+                      text-slate-300
+
+                      hover:bg-slate-700
+                      hover:text-white
+
+                      transition
+                    "
                   >
                     Add Blog
                   </button>
@@ -701,26 +728,26 @@ const Sidebar = () => {
                   <button
                     type="button"
                     onClick={() =>
-                      goTo(
-                        "/likedata"
-                      )
+                      goTo("/likedata")
                     }
-                    className={`
+                    className="
                       w-full
                       text-left
+
                       px-4
                       py-2.5
-                      rounded-lg
-                      text-sm
-                      transition
 
-                      ${
-                        location.pathname ===
-                        "/likedata"
-                          ? "bg-blue-600 text-white"
-                          : "text-slate-300 hover:bg-slate-700 hover:text-white"
-                      }
-                    `}
+                      rounded-lg
+
+                      text-sm
+
+                      text-slate-300
+
+                      hover:bg-slate-700
+                      hover:text-white
+
+                      transition
+                    "
                   >
                     All Likes
                   </button>
@@ -733,7 +760,7 @@ const Sidebar = () => {
 
 
           {/* ==================================================
-              CATEGORY DROPDOWN
+              CATEGORIES
           =================================================== */}
 
           <div>
@@ -753,15 +780,21 @@ const Sidebar = () => {
               }}
               className="
                 w-full
+
                 flex
                 items-center
                 justify-between
+
                 px-4
                 py-3
+
                 rounded-xl
+
                 text-slate-300
+
                 hover:bg-slate-700
                 hover:text-white
+
                 transition
               "
             >
@@ -782,6 +815,7 @@ const Sidebar = () => {
                 />
 
                 {open && (
+
                   <span
                     className="
                       font-medium
@@ -790,6 +824,7 @@ const Sidebar = () => {
                   >
                     Categories
                   </span>
+
                 )}
 
               </div>
@@ -798,13 +833,9 @@ const Sidebar = () => {
               {open && (
 
                 categoryDropdown ? (
-                  <FaChevronUp
-                    className="text-sm"
-                  />
+                  <FaChevronUp />
                 ) : (
-                  <FaChevronDown
-                    className="text-sm"
-                  />
+                  <FaChevronDown />
                 )
 
               )}
@@ -812,7 +843,7 @@ const Sidebar = () => {
             </button>
 
 
-            {/* CATEGORY SUBMENU */}
+            {/* CATEGORY MENU */}
 
             {categoryDropdown &&
               open && (
@@ -822,8 +853,10 @@ const Sidebar = () => {
                     ml-6
                     mt-2
                     pl-3
+
                     border-l
                     border-slate-700
+
                     space-y-1
                   "
                 >
@@ -833,26 +866,26 @@ const Sidebar = () => {
                   <button
                     type="button"
                     onClick={() =>
-                      goTo(
-                        "/addcategory"
-                      )
+                      goTo("/addcategory")
                     }
-                    className={`
+                    className="
                       w-full
                       text-left
+
                       px-4
                       py-2.5
-                      rounded-lg
-                      text-sm
-                      transition
 
-                      ${
-                        location.pathname ===
-                        "/addcategory"
-                          ? "bg-blue-600 text-white"
-                          : "text-slate-300 hover:bg-slate-700 hover:text-white"
-                      }
-                    `}
+                      rounded-lg
+
+                      text-sm
+
+                      text-slate-300
+
+                      hover:bg-slate-700
+                      hover:text-white
+
+                      transition
+                    "
                   >
                     Add Category
                   </button>
@@ -863,26 +896,26 @@ const Sidebar = () => {
                   <button
                     type="button"
                     onClick={() =>
-                      goTo(
-                        "/allcategory"
-                      )
+                      goTo("/allcategory")
                     }
-                    className={`
+                    className="
                       w-full
                       text-left
+
                       px-4
                       py-2.5
-                      rounded-lg
-                      text-sm
-                      transition
 
-                      ${
-                        location.pathname ===
-                        "/allcategory"
-                          ? "bg-blue-600 text-white"
-                          : "text-slate-300 hover:bg-slate-700 hover:text-white"
-                      }
-                    `}
+                      rounded-lg
+
+                      text-sm
+
+                      text-slate-300
+
+                      hover:bg-slate-700
+                      hover:text-white
+
+                      transition
+                    "
                   >
                     All Categories
                   </button>
@@ -897,13 +930,15 @@ const Sidebar = () => {
 
 
         {/* =====================================================
-            BOTTOM SIGN OUT
+            SIGN OUT
         ====================================================== */}
 
         <div
           className="
             shrink-0
+
             p-4
+
             border-t
             border-slate-700
           "
@@ -914,24 +949,31 @@ const Sidebar = () => {
             onClick={signout}
             className="
               w-full
+
               flex
               items-center
               justify-center
               gap-3
+
               py-3
+
               rounded-xl
+
               bg-red-500/10
+
               text-red-400
+
               hover:bg-red-500
               hover:text-white
+
               transition
-              duration-200
             "
           >
 
             <FaSignOutAlt />
 
             {open && (
+
               <span
                 className="
                   font-medium
@@ -939,6 +981,7 @@ const Sidebar = () => {
               >
                 Sign Out
               </span>
+
             )}
 
           </button>

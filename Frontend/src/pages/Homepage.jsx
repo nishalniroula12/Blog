@@ -134,7 +134,7 @@ const Homepage = () => {
             >
               <div className="overflow-hidden">
                 <img
-                  src={`http://localhost:4000/uploads/${item.image}`}
+                  src={`${import.meta.env.VITE_RENDER_URL}uploads/${item.image}`}
                   alt={item.title}
                   className="w-full h-60 object-cover hover:scale-110 transition duration-500"
                 />

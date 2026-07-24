@@ -61,21 +61,18 @@ function Admindashboard() {
     try {
       setLoading(true);
 
-      const [blogResponse, categoryResponse] =
-        await Promise.all([
-          api.get("/api/getblog"),
-          api.get("/api/getdata"),
-        ]);
+      const [blogResponse, categoryResponse] = await Promise.all([
+        api.get("/api/getblog"),
+        api.get("/api/getdata"),
+      ]);
 
-      // Blog count
-      setBlog(
-        blogResponse.data?.blog?.length || 0
-      );
+      // BLOG COUNT
+      const blogs = blogResponse.data?.blog || [];
+      setBlog(blogs.length);
 
-      // Category count
-      setCategory(
-        categoryResponse.data?.category?.length || 0
-      );
+      // CATEGORY COUNT
+      const categories = categoryResponse.data?.category || [];
+      setCategory(categories.length);
     } catch (error) {
       console.log(
         "Dashboard Fetch Error:",
@@ -92,13 +89,13 @@ function Admindashboard() {
 
   const fetchLike = async () => {
     try {
-      const res = await api.get("/api/getlike",  
-        
-           );
+      const res = await api.get("/api/getlike", {
+        withCredentials: true,
+      });
 
-      setLike(
-        res.data?.likeblogs?.length || 0
-      );
+      const likes = res.data?.likeblogs || [];
+
+      setLike(likes.length);
     } catch (error) {
       console.log(
         "Like Fetch Error:",
@@ -119,9 +116,7 @@ function Admindashboard() {
       return;
     }
 
-    navigate(
-      `/allblog?search=${encodeURIComponent(value)}`
-    );
+    navigate(`/allblog?search=${encodeURIComponent(value)}`);
   };
 
   // ==================================================
@@ -166,12 +161,19 @@ function Admindashboard() {
 
       {/* ==================================================
           MAIN CONTENT
+
+          lg:ml-64
+          -----------------------------------------------
+          Mobile  : margin-left 0
+          Tablet  : margin-left 0
+          Desktop : margin-left 16rem (Sidebar width)
       =================================================== */}
 
       <div
         className="
           min-h-screen
           w-full
+          lg:ml-64
           relative
           z-0
         "
@@ -308,9 +310,7 @@ function Admindashboard() {
               <button
                 type="button"
                 onClick={() =>
-                  setIsDropdownOpen(
-                    !isDropdownOpen
-                  )
+                  setIsDropdownOpen(!isDropdownOpen)
                 }
                 className="
                   flex
@@ -579,6 +579,7 @@ function Admindashboard() {
         <main
           className="
             w-full
+            max-w-full
             p-4
             sm:p-6
             lg:p-8
@@ -645,6 +646,7 @@ function Admindashboard() {
                   relative
                   flex-1
                   w-full
+                  min-w-0
                 "
               >
                 <FaSearch
@@ -667,9 +669,7 @@ function Admindashboard() {
                   placeholder="Search blogs by title or category..."
                   value={searchQuery}
                   onChange={(e) =>
-                    setSearchQuery(
-                      e.target.value
-                    )
+                    setSearchQuery(e.target.value)
                   }
                   onFocus={() =>
                     setSearchFocused(true)
@@ -677,11 +677,10 @@ function Admindashboard() {
                   onBlur={() =>
                     setSearchFocused(false)
                   }
-                  onKeyDown={
-                    handleSearchKeyDown
-                  }
+                  onKeyDown={handleSearchKeyDown}
                   className="
                     w-full
+                    min-w-0
                     pl-11
                     pr-4
                     py-3
@@ -723,6 +722,7 @@ function Admindashboard() {
                   gap-2
                   transition
                   active:scale-95
+                  flex-shrink-0
                 "
               >
                 <FaSearch />
@@ -741,6 +741,7 @@ function Admindashboard() {
           <div
             className="
               w-full
+              max-w-full
               grid
               grid-cols-1
               sm:grid-cols-2
@@ -764,6 +765,7 @@ function Admindashboard() {
                 sm:p-6
                 border
                 border-slate-100
+                overflow-hidden
               "
             >
               <h2
@@ -804,6 +806,7 @@ function Admindashboard() {
                 sm:p-6
                 border
                 border-slate-100
+                overflow-hidden
               "
             >
               <h2
@@ -825,9 +828,7 @@ function Admindashboard() {
                   mt-4
                 "
               >
-                {loading
-                  ? "..."
-                  : category}
+                {loading ? "..." : category}
               </p>
             </div>
 
@@ -846,6 +847,7 @@ function Admindashboard() {
                 sm:p-6
                 border
                 border-slate-100
+                overflow-hidden
               "
             >
               <h2
@@ -947,6 +949,7 @@ function Admindashboard() {
         <div
           className="
             w-full
+            max-w-full
             px-4
             sm:px-6
             lg:px-8

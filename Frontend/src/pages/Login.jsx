@@ -7,13 +7,6 @@ import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
 
 import { loginUser } from "../Redux/Slice";
 import api from "../api/axios";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-
-// Simple, dependency-free validation (swap for Yup if you prefer)
 const validate = (values) => {
   const errors = {};
 

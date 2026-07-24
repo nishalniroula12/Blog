@@ -68,11 +68,11 @@ function Admindashboard() {
 
       // BLOG COUNT
       const blogs = blogResponse.data?.blog || [];
-      setBlog(blogs.length);
+      setBlog(blogs?.length);
 
       // CATEGORY COUNT
       const categories = categoryResponse.data?.category || [];
-      setCategory(categories.length);
+      setCategory(categories?.length);
     } catch (error) {
       console.log(
         "Dashboard Fetch Error:",

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Formik } from "formik";
-import axios from "axios";
 import Sidebar from "./Sidebar";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
@@ -70,9 +69,7 @@ const AllCategory = () => {
                   const res = await api.put(
                     `api/updatecategory/${id}`,
                     values,
-                    {
-                      withCredentials: true,
-                    }
+                    
                   );
 
                   console.log(res);

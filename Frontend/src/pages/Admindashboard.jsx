@@ -92,9 +92,9 @@ function Admindashboard() {
 
   const fetchLike = async () => {
     try {
-      const res = await api.get("/api/getlike", {
-        withCredentials: true,
-      });
+      const res = await api.get("/api/getlike",  
+        
+           );
 
       setLike(
         res.data?.likeblogs?.length || 0
